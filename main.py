@@ -1,138 +1,139 @@
-"""
-Wildfire Risk Model — Forest Environmental Monitoring
-Leaving Certificate Computer Science 2026
-BBC micro:bit Embedded System Project
+# Wildfire Risk Model - Forest Environmental Monitoring
+# Leaving Certificate Computer Science 2026
+# BBC micro:bit Embedded System Project
 
-This model uses data collected from the micro:bit (temperature, light level,
-rolling baseline, dynamic threshold, fire risk score) and simulates two
-what-if scenarios to predict how wildfire risk changes under different
-environmental conditions.
-"""
-
-import csv
-import os
-import random
 import math
+import csv
 
-# ─────────────────────────────────────────────────────────
-# SECTION 1: LOAD OR SIMULATE MICROBIT DATA
-# The micro:bit logs data to a CSV. If that file is present
-# we use it. Otherwise we generate realistic simulated data.
-# ─────────────────────────────────────────────────────────
 
-DATAFILE = "microbit_log.csv"
 
-def generate_simulated_data(n=120):
-    """
-    Generate n simulated readings that mimic a typical day cycle.
-    Temperature rises through the morning, peaks midday, then falls.
-    Light follows a similar pattern.
-    """
+# SECTION 1: GET USER INPUT
+
+
+def get_float(prompt, min_val=None, max_val=None):
+    while True:
+        try:
+            val = float(input(prompt))
+            if min_val is not None and val < min_val:
+                print("  Value must be at least " + str(min_val) + ". Try again.")
+                continue
+            if max_val is not None and val > max_val:
+                print("  Value must be at most " + str(max_val) + ". Try again.")
+                continue
+            return val
+        except ValueError:
+            print("  Please enter a valid number.")
+
+def get_int(prompt, min_val=None, max_val=None):
+    while True:
+        try:
+            val = int(input(prompt))
+            if min_val is not None and val < min_val:
+                print("  Value must be at least " + str(min_val) + ". Try again.")
+                continue
+            if max_val is not None and val > max_val:
+                print("  Value must be at most " + str(max_val) + ". Try again.")
+                continue
+            return val
+        except ValueError:
+            print("  Please enter a whole number.")
+
+def collect_user_inputs():
+    print("-" * 60)
+    print("  ENTER YOUR MICRO:BIT SENSOR READINGS")
+    print("-" * 60)
+
+    print("\n  --- Temperature Readings (degrees C) ---")
+    peak_temp       = get_float("  Peak (highest) temperature recorded: ")
+    low_temp        = get_float("  Lowest temperature recorded: ", max_val=peak_temp)
+    start_temp      = get_float("  Starting temperature (first reading): ", min_val=low_temp, max_val=peak_temp)
+    max_temp_change = get_float("  Largest single-cycle temperature change (degrees C, e.g. 3.5): ", min_val=0)
+
+    print("\n  --- Light Level Readings (0-255) ---")
+    peak_light = get_int("  Peak (highest) light level recorded (0-255): ", min_val=0, max_val=255)
+    avg_light  = get_int("  Average light level across the session (0-255): ", min_val=0, max_val=peak_light)
+
+    print("\n  --- Session Info ---")
+    num_readings = get_int("  Total number of readings logged: ", min_val=1)
+    duration_min = get_float("  Session duration in minutes: ", min_val=0.1)
+
+    return {
+        "peak_temp":        peak_temp,
+        "low_temp":         low_temp,
+        "start_temp":       start_temp,
+        "max_temp_change":  max_temp_change,
+        "peak_light":       peak_light,
+        "avg_light":        avg_light,
+        "num_readings":     num_readings,
+        "duration_min":     duration_min,
+    }
+
+
+
+# SECTION 2: BUILD DATA SERIES FROM USER INPUTS
+
+
+def build_data_from_inputs(inputs):
+    n       = inputs["num_readings"]
+    peak    = inputs["peak_temp"]
+    low     = inputs["low_temp"]
+    start   = inputs["start_temp"]
+    p_light = inputs["peak_light"]
+    a_light = inputs["avg_light"]
+
     data = []
     for i in range(n):
-        hour = (i / n) * 24  # simulate 24 hours across all readings
+        t = i / max(n - 1, 1)
 
-        # Base temperature follows a sine curve: cooler at night, warmer midday
-        base_temp = 15 + 10 * math.sin(math.pi * (hour - 6) / 12)
-        # Add small random noise
-        temp = round(base_temp + random.uniform(-1.5, 1.5), 1)
+        mid = (peak + low) / 2
+        amp = (peak - low) / 2
+        phase_offset = 0.0
+        if amp > 0:
+            ratio = max(-1.0, min(1.0, (start - mid) / amp))
+            phase_offset = math.asin(ratio)
+        temp  = round(mid + amp * math.sin(math.pi * t + phase_offset), 1)
+        light = int(max(0, min(255, a_light + (p_light - a_light) * math.sin(math.pi * t))))
 
-        # Light follows sun position: 0 at night, peaks midday
-        if 6 <= hour <= 20:
-            light = int(100 + 155 * math.sin(math.pi * (hour - 6) / 14))
-        else:
-            light = random.randint(0, 20)
+        data.append({"reading": i + 1, "temperature": temp, "light": light})
 
-        data.append({
-            "reading": i + 1,
-            "temperature": temp,
-            "light": light,
-        })
     return data
 
 
-def load_microbit_data():
-    """Load data from micro:bit CSV log if it exists, else simulate."""
-    if os.path.exists(DATAFILE):
-        rows = []
-        with open(DATAFILE, newline="") as f:
-            reader = csv.DictReader(f)
-            for i, row in enumerate(reader):
-                try:
-                    rows.append({
-                        "reading": i + 1,
-                        "temperature": float(row.get("temperature", row.get("temperature value", 0))),
-                        "light": int(float(row.get("light", row.get("light value", 0)))),
-                    })
-                except ValueError:
-                    continue
-        if rows:
-            print(f"Loaded {len(rows)} readings from {DATAFILE}")
-            return rows
-    print("No micro:bit data file found — using simulated data (120 readings, 24-hour cycle)")
-    return generate_simulated_data(120)
 
-
-# ─────────────────────────────────────────────────────────
-# SECTION 2: THE ADAPTIVE WILDFIRE RISK MODEL
-# Mirrors the logic running on the micro:bit but extended
-# to process a full dataset and track how risk evolves.
-# ─────────────────────────────────────────────────────────
+# SECTION 3: ADAPTIVE WILDFIRE RISK MODEL
 
 def run_model(data, temp_offset=0, light_multiplier=1.0, label="Baseline", freeze_baseline=False):
-    """
-    Run the adaptive wildfire risk model over a dataset.
-
-    Parameters:
-        data             — list of {reading, temperature, light} dicts
-        temp_offset      — add this to every temperature reading (what-if: hotter climate)
-        light_multiplier — multiply every light reading (what-if: longer/more intense sun)
-        label            — name for this scenario
-
-    Returns a list of result dicts with risk scores and model state per reading.
-    """
     if not data:
-        return []
+        return [], {}
 
-    # Initialise the adaptive model state.
-    # freeze_baseline: keep rolling avg fixed so we see raw impact of scenario.
-    rolling_avg = data[0]["temperature"]  # always start from real baseline
-    warning_margin = 5
-    critical_margin = 10
-    alert_count = 0
-    all_clear_count = 0
-
-    results = []
-    total_risk = 0
-    critical_events = 0
+    rolling_avg       = data[0]["temperature"]
+    warning_margin    = 5
+    critical_margin   = 10
+    alert_count       = 0
+    all_clear_count   = 0
+    results           = []
+    total_risk        = 0
+    critical_events   = 0
     high_light_events = 0
 
     for row in data:
-        temp = row["temperature"] + temp_offset
+        temp  = row["temperature"] + temp_offset
         light = min(255, int(row["light"] * light_multiplier))
 
-        # Update rolling average (exponential moving average)
-        # If freeze_baseline, the avg doesn't update — models sudden unexpected event
         if not freeze_baseline:
             rolling_avg = rolling_avg * 0.9 + temp * 0.1
 
-        # Recalculate dynamic thresholds from baseline
-        warning_threshold = rolling_avg + warning_margin
+        warning_threshold  = rolling_avg + warning_margin
         critical_threshold = rolling_avg + critical_margin
 
-        # Score fire risk (0–4)
         risk = 0
-        if temp > rolling_avg + 2:
-            risk += 1
-        if temp > warning_threshold:
-            risk += 1
-        if temp > critical_threshold:
-            risk += 1
+        if temp > rolling_avg + 2:    risk += 1
+        if temp > warning_threshold:  risk += 1
+        if temp > critical_threshold: risk += 1
         if light > 170:
             risk += 1
             high_light_events += 1
 
-        # Adapt margins based on sustained conditions
         if risk >= 3:
             alert_count += 1
             all_clear_count = 0
@@ -150,166 +151,86 @@ def run_model(data, temp_offset=0, light_multiplier=1.0, label="Baseline", freez
             critical_events += 1
 
         results.append({
-            "reading": row["reading"],
-            "temperature": round(temp, 1),
-            "light": light,
-            "rolling_avg": round(rolling_avg, 1),
+            "reading":           row["reading"],
+            "temperature":       round(temp, 1),
+            "light":             light,
+            "rolling_avg":       round(rolling_avg, 1),
             "warning_threshold": round(warning_threshold, 1),
-            "fire_risk": risk,
-            "warning_margin": warning_margin,
-            "alert_count": alert_count,
+            "fire_risk":         risk,
+            "warning_margin":    warning_margin,
         })
 
-    avg_risk = total_risk / len(data) if data else 0
+    avg_risk = total_risk / len(data)
 
-    # Summary
     summary = {
-        "label": label,
-        "readings": len(data),
-        "avg_risk": round(avg_risk, 2),
-        "critical_events": critical_events,
-        "high_light_events": high_light_events,
-        "peak_risk": max(r["fire_risk"] for r in results),
-        "peak_temp": max(r["temperature"] for r in results),
-        "final_warning_margin": results[-1]["warning_margin"] if results else warning_margin,
+        "label":                label,
+        "readings":             len(data),
+        "avg_risk":             round(avg_risk, 2),
+        "critical_events":      critical_events,
+        "high_light_events":    high_light_events,
+        "peak_risk":            max(r["fire_risk"] for r in results),
+        "peak_temp":            max(r["temperature"] for r in results),
+        "final_warning_margin": results[-1]["warning_margin"],
     }
 
     return results, summary
 
 
-# ─────────────────────────────────────────────────────────
-# SECTION 3: WHAT-IF SCENARIOS
-# ─────────────────────────────────────────────────────────
 
-def print_separator(char="─", width=60):
-    print(char * width)
-
-def print_summary(summary):
-    print(f"\n  Scenario:            {summary['label']}")
-    print(f"  Readings processed:  {summary['readings']}")
-    print(f"  Average risk score:  {summary['avg_risk']} / 4")
-    print(f"  Critical events:     {summary['critical_events']}  (risk ≥ 3)")
-    print(f"  High light events:   {summary['high_light_events']}  (light > 170)")
-    print(f"  Peak temperature:    {summary['peak_temp']}°C")
-    print(f"  Peak risk score:     {summary['peak_risk']} / 4")
-    print(f"  Final warning margin:{summary['final_warning_margin']}°C  (adapted from 5°C)")
-
-def risk_label(score):
-    return ["Safe", "Low", "Moderate", "High", "Critical"][min(score, 4)]
-
-def compare_summaries(baseline, scenario, scenario_name):
-    print(f"\n  📊 Impact of '{scenario_name}' vs Baseline:")
-    avg_change = scenario["avg_risk"] - baseline["avg_risk"]
-    crit_change = scenario["critical_events"] - baseline["critical_events"]
-    temp_change = scenario["peak_temp"] - baseline["peak_temp"]
-    print(f"     Average risk change:    {avg_change:+.2f}")
-    print(f"     Critical events change: {crit_change:+d}")
-    print(f"     Peak temperature:       {scenario['peak_temp']}°C  (was {baseline['peak_temp']}°C, Δ {temp_change:+.1f}°C)")
-
-
-# ─────────────────────────────────────────────────────────
 # SECTION 4: SAVE RESULTS TO CSV
-# ─────────────────────────────────────────────────────────
 
-def save_results(results, filename):
+
+def save_csv(results, filename):
     if not results:
         return
-    fieldnames = results[0].keys()
     with open(filename, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer = csv.DictWriter(f, fieldnames=results[0].keys())
         writer.writeheader()
         writer.writerows(results)
-    print(f"\n  Results saved to: {filename}")
 
 
-# ─────────────────────────────────────────────────────────
-# MAIN — Run all three scenarios and compare
-# ─────────────────────────────────────────────────────────
+
+# MAIN
+
 
 def main():
-    print_separator("═")
-    print("  WILDFIRE RISK MODEL — Forest Environmental Monitoring")
-    print("  Leaving Certificate Computer Science 2026")
-    print_separator("═")
+    inputs = collect_user_inputs()
+    data   = build_data_from_inputs(inputs)
 
-    # Load data from micro:bit or simulate
-    data = load_microbit_data()
-    print(f"  Total readings: {len(data)}")
+    baseline_results, baseline_summary = run_model(
+        data, temp_offset=0, light_multiplier=1.0, label="Baseline")
 
-    print_separator()
-
-    # ── SCENARIO 0: Baseline (actual collected data, no changes)
-    print("\n[SCENARIO 0] BASELINE — Actual micro:bit data, no modifications")
-    baseline_results, baseline_summary = run_model(data, temp_offset=0, light_multiplier=1.0, label="Baseline")
-    print_summary(baseline_summary)
-    save_results(baseline_results, "results_baseline.csv")
-
-    print_separator()
-
-    # ── SCENARIO 1: What if temperature increases by 8°C suddenly?
-    # freeze_baseline=True models a sudden unexpected heatwave — the system
-    # hasn't had time to recalibrate, so the raw danger is fully visible.
-    # This is the more realistic "disaster" scenario.
-    print("\n[SCENARIO 1] WHAT-IF: Sudden temperature increase of +8°C")
-    print("  (Simulates: sudden heatwave / climate shock — baseline not yet adapted)")
     s1_results, s1_summary = run_model(
-        data,
-        temp_offset=8,
-        light_multiplier=1.0,
-        label="Heatwave (+8°C, sudden)",
-        freeze_baseline=True
-    )
-    print_summary(s1_summary)
-    compare_summaries(baseline_summary, s1_summary, "Heatwave +8°C")
-    save_results(s1_results, "results_scenario1_heatwave.csv")
+        data, temp_offset=8, light_multiplier=1.0,
+        label="Heatwave +8C", freeze_baseline=True)
 
-    print_separator()
-
-    # ── SCENARIO 2: What if light intensity increases by 40%?
-    # This simulates deforestation / canopy loss — more direct sunlight
-    # reaching the forest floor, drying conditions and increasing fire risk.
-    print("\n[SCENARIO 2] WHAT-IF: Light intensity increases by 40%")
-    print("  (Simulates: canopy loss / deforestation — more direct sun exposure)")
     s2_results, s2_summary = run_model(
-        data,
-        temp_offset=0,
-        light_multiplier=1.4,
-        label="Canopy Loss (light ×1.4)"
-    )
-    print_summary(s2_summary)
-    compare_summaries(baseline_summary, s2_summary, "Canopy Loss +40% light")
-    save_results(s2_results, "results_scenario2_canopy_loss.csv")
+        data, temp_offset=0, light_multiplier=1.4,
+        label="Canopy Loss light x1.4")
 
-    print_separator()
-
-    # ── COMBINED SCENARIO: Both heatwave + canopy loss
-    print("\n[BONUS] COMBINED: Heatwave +8°C AND canopy loss +40% light")
-    print("  (Worst-case: drought + deforestation together)")
     sc_results, sc_summary = run_model(
-        data,
-        temp_offset=8,
-        light_multiplier=1.4,
-        label="Combined worst-case",
-        freeze_baseline=True
-    )
-    print_summary(sc_summary)
-    compare_summaries(baseline_summary, sc_summary, "Combined worst-case")
-    save_results(sc_results, "results_scenario_combined.csv")
+        data, temp_offset=8, light_multiplier=1.4,
+        label="Combined worst-case", freeze_baseline=True)
 
-    print_separator("═")
-    print("\n  FINAL COMPARISON TABLE")
-    print_separator()
-    print(f"  {'Scenario':<30} {'Avg Risk':>10} {'Critical':>10} {'Peak Temp':>12}")
-    print_separator()
+    save_csv(baseline_results, "results_baseline.csv")
+    save_csv(s1_results,       "results_heatwave.csv")
+    save_csv(s2_results,       "results_canopy_loss.csv")
+    save_csv(sc_results,       "results_combined.csv")
+
+    print("\n  fire risk score (0 = safe, 4 = critical)")
+    print("-" * 60)
+    print("  Scenario                         Avg Risk   Critical Events")
+    print("-" * 60)
     for s in [baseline_summary, s1_summary, s2_summary, sc_summary]:
-        print(f"  {s['label']:<30} {s['avg_risk']:>10.2f} {s['critical_events']:>10} {s['peak_temp']:>11.1f}°C")
-    print_separator("═")
-    print("\n  Output files written:")
+        print("  " + s["label"].ljust(32) +
+              str(s["avg_risk"]).rjust(8) +
+              str(s["critical_events"]).rjust(16))
+    print("-" * 60)
+    print("\n  CSV files saved:")
     print("    results_baseline.csv")
-    print("    results_scenario1_heatwave.csv")
-    print("    results_scenario2_canopy_loss.csv")
-    print("    results_scenario_combined.csv")
-    print("\n  Done.")
+    print("    results_heatwave.csv")
+    print("    results_canopy_loss.csv")
+    print("    results_combined.csv")
 
 
 if __name__ == "__main__":
