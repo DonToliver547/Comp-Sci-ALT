@@ -4,815 +4,433 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forest Wildfire Monitoring System — LC Computer Science 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap');
-
-  :root {
-    --forest:   #0d1f0f;
-    --bark:     #1a2e1c;
-    --moss:     #2d4a30;
-    --fern:     #3d6b3f;
-    --leaf:     #5a9e5e;
-    --lime:     #8ecf72;
-    --ember:    #e07b39;
-    --ash:      #c9b99a;
-    --smoke:    #8a9e8c;
-    --paper:    #f5f0e8;
-    --white:    #ffffff;
-    --danger:   #c0392b;
-    --warn:     #e07b39;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
   body {
-    background: var(--forest);
-    color: var(--paper);
-    font-family: 'Outfit', sans-serif;
-    font-weight: 300;
-    line-height: 1.7;
+    font-family: Georgia, 'Times New Roman', serif;
     font-size: 16px;
-  }
-
-  /* ── NOISE TEXTURE OVERLAY ── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.6;
-  }
-
-  /* ── NAV ── */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: rgba(13, 31, 15, 0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(90, 158, 94, 0.2);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-  }
-
-  .nav-brand {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--lime);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 0.25rem;
-    list-style: none;
-  }
-
-  .nav-links a {
-    font-size: 0.75rem;
-    color: var(--smoke);
-    text-decoration: none;
-    padding: 0.4rem 0.75rem;
-    border-radius: 4px;
-    transition: all 0.2s;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 0.05em;
-  }
-
-  .nav-links a:hover {
-    color: var(--lime);
-    background: rgba(90, 158, 94, 0.1);
-  }
-
-  /* ── HERO ── */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    padding: 6rem 4rem 4rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(45, 74, 48, 0.4) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(224, 123, 57, 0.08) 0%, transparent 60%),
-      linear-gradient(160deg, #0d1f0f 0%, #0f2510 40%, #0d1f0f 100%);
-  }
-
-  /* Animated tree silhouettes */
-  .trees {
-    position: absolute;
-    bottom: 0; right: 0;
-    width: 50%;
-    height: 100%;
-    opacity: 0.08;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'%3E%3Cpolygon points='100,550 140,300 180,550' fill='%235a9e5e'/%3E%3Cpolygon points='130,400 160,200 190,400' fill='%235a9e5e'/%3E%3Cpolygon points='250,550 310,280 370,550' fill='%235a9e5e'/%3E%3Cpolygon points='280,380 310,160 340,380' fill='%235a9e5e'/%3E%3Cpolygon points='420,550 490,260 560,550' fill='%235a9e5e'/%3E%3Cpolygon points='455,370 490,140 525,370' fill='%235a9e5e'/%3E%3Cpolygon points='600,550 650,300 700,550' fill='%235a9e5e'/%3E%3Cpolygon points='625,400 650,200 675,400' fill='%235a9e5e'/%3E%3C/svg%3E") no-repeat bottom right / contain;
-  }
-
-  .hero-content {
-    position: relative;
-    max-width: 680px;
-  }
-
-  .hero-tag {
-    display: inline-block;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--lime);
-    border: 1px solid rgba(142, 207, 114, 0.3);
-    padding: 0.35rem 0.8rem;
-    border-radius: 2px;
-    margin-bottom: 2rem;
-    animation: fadeUp 0.8s ease both;
-  }
-
-  .hero h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(2.4rem, 5vw, 4rem);
-    line-height: 1.1;
-    color: var(--white);
-    margin-bottom: 1.5rem;
-    animation: fadeUp 0.8s 0.1s ease both;
-  }
-
-  .hero h1 em {
-    font-style: italic;
-    color: var(--lime);
-  }
-
-  .hero-sub {
-    color: var(--smoke);
-    font-size: 1.05rem;
-    max-width: 520px;
-    margin-bottom: 2.5rem;
-    animation: fadeUp 0.8s 0.2s ease both;
-  }
-
-  .hero-meta {
-    display: flex;
-    gap: 2rem;
-    animation: fadeUp 0.8s 0.3s ease both;
-  }
-
-  .meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .meta-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--smoke);
-  }
-
-  .meta-value {
-    font-size: 0.9rem;
-    color: var(--ash);
-    font-weight: 500;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── SECTIONS ── */
-  section {
-    padding: 5rem 4rem;
-    max-width: 900px;
+    line-height: 1.7;
+    color: #222;
+    background: #fff;
+    max-width: 800px;
     margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
   }
 
-  .section-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--lime);
-    margin-bottom: 0.6rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .section-tag::after {
-    content: '';
-    flex: 1;
-    max-width: 40px;
-    height: 1px;
-    background: rgba(142, 207, 114, 0.3);
-  }
-
-  h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(1.8rem, 3vw, 2.6rem);
-    color: var(--white);
+  /* Header */
+  header {
+    border-bottom: 2px solid #222;
+    padding-bottom: 1rem;
     margin-bottom: 2rem;
-    line-height: 1.15;
+  }
+
+  header p.subtitle {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 0.3rem 0 0;
+    font-style: italic;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: normal;
+    margin: 0 0 0.25rem;
+  }
+
+  /* Nav */
+  nav {
+    margin-bottom: 2.5rem;
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+  }
+
+  nav a {
+    color: #006;
+    text-decoration: none;
+    margin-right: 1.2rem;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+
+  /* Section headings */
+  h2 {
+    font-size: 1.35rem;
+    font-weight: bold;
+    margin: 2.5rem 0 0.75rem;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.3rem;
   }
 
   h3 {
-    font-family: 'Outfit', sans-serif;
     font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--lime);
-    margin: 2rem 0 0.75rem;
-    letter-spacing: 0.02em;
+    font-weight: bold;
+    margin: 1.8rem 0 0.5rem;
   }
 
-  p { margin-bottom: 1.1rem; color: var(--ash); }
-
-  strong { color: var(--paper); font-weight: 500; }
-
-  /* ── DIVIDER ── */
-  .divider {
-    border: none;
-    border-top: 1px solid rgba(90, 158, 94, 0.12);
-    margin: 0;
+  p {
+    margin: 0 0 1rem;
   }
 
-  /* ── VIDEO BLOCK ── */
+  /* Video placeholder */
   .video-block {
-    background: var(--bark);
-    border: 1px solid rgba(90, 158, 94, 0.2);
-    border-radius: 8px;
-    overflow: hidden;
-    margin: 2rem 0;
+    border: 1px solid #bbb;
+    background: #f5f5f5;
+    padding: 2rem;
+    text-align: center;
+    margin: 1.5rem 0;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    color: #555;
   }
 
-  .video-label {
-    padding: 0.75rem 1.25rem;
-    background: rgba(90, 158, 94, 0.08);
-    border-bottom: 1px solid rgba(90, 158, 94, 0.15);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--smoke);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .video-label::before {
-    content: '▶';
-    color: var(--ember);
-    font-size: 0.6rem;
-  }
-
-  .video-placeholder {
-    aspect-ratio: 16/9;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    background: rgba(0,0,0,0.3);
-    color: var(--smoke);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-  }
-
-  .video-placeholder .play-icon {
-    width: 64px; height: 64px;
-    border: 2px solid rgba(142, 207, 114, 0.3);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    color: rgba(142, 207, 114, 0.5);
-  }
+  .video-block p { margin: 0.25rem 0; }
 
   video {
     width: 100%;
     display: block;
-    background: #000;
   }
 
-  /* ── REQUIREMENTS GRID ── */
-  .req-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin: 2rem 0;
+  /* Requirements list */
+  .req-list {
+    margin: 1rem 0 1rem 1.5rem;
+    padding: 0;
   }
 
-  .req-card {
-    background: var(--bark);
-    border: 1px solid rgba(90, 158, 94, 0.15);
-    border-radius: 6px;
-    padding: 1.25rem;
-    position: relative;
+  .req-list li {
+    margin-bottom: 1rem;
   }
 
-  .req-card.advanced {
-    border-color: rgba(224, 123, 57, 0.25);
+  .req-list li strong {
+    display: block;
   }
 
-  .req-badge {
+  .badge {
     display: inline-block;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
+    font-family: Arial, sans-serif;
+    font-size: 0.72rem;
+    font-weight: bold;
     text-transform: uppercase;
-    padding: 0.2rem 0.5rem;
-    border-radius: 2px;
-    margin-bottom: 0.75rem;
-    background: rgba(142, 207, 114, 0.1);
-    color: var(--lime);
-    border: 1px solid rgba(142, 207, 114, 0.2);
+    letter-spacing: 0.05em;
+    background: #eee;
+    border: 1px solid #bbb;
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    margin-right: 0.4rem;
+    vertical-align: middle;
   }
 
-  .req-card.advanced .req-badge {
-    background: rgba(224, 123, 57, 0.1);
-    color: var(--ember);
-    border-color: rgba(224, 123, 57, 0.2);
+  .badge.advanced {
+    background: #fff3e0;
+    border-color: #d4840a;
+    color: #a35c00;
   }
 
-  .req-card h4 {
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
     font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--paper);
-    margin-bottom: 0.5rem;
+    font-family: Arial, sans-serif;
   }
 
-  .req-card p { font-size: 0.85rem; margin: 0; }
-
-  .req-tick {
-    position: absolute;
-    top: 1rem; right: 1rem;
-    color: var(--lime);
-    font-size: 1rem;
+  th {
+    background: #f0f0f0;
+    border: 1px solid #bbb;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-weight: bold;
   }
 
-  /* ── INFO BOXES ── */
-  .info-box {
-    background: var(--bark);
-    border-left: 3px solid var(--leaf);
-    border-radius: 0 6px 6px 0;
-    padding: 1.25rem 1.5rem;
-    margin: 1.5rem 0;
+  td {
+    border: 1px solid #ccc;
+    padding: 0.5rem 0.75rem;
+    vertical-align: top;
   }
 
-  .info-box.warn {
-    border-color: var(--ember);
+  tr:nth-child(even) td {
+    background: #fafafa;
   }
 
-  .info-box p { margin: 0; font-size: 0.9rem; }
+  tr.total td {
+    font-weight: bold;
+    background: #f0f0f0;
+  }
 
-  /* ── CODE BLOCK ── */
+  /* Code block */
   .code-block {
-    background: #0a160b;
-    border: 1px solid rgba(90, 158, 94, 0.15);
-    border-radius: 6px;
-    padding: 1.5rem;
-    margin: 1.5rem 0;
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    border-left: 4px solid #888;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
     overflow-x: auto;
   }
 
   .code-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--smoke);
-    margin-bottom: 1rem;
-    border-bottom: 1px solid rgba(90, 158, 94, 0.1);
-    padding-bottom: 0.6rem;
+    font-family: Arial, sans-serif;
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: 0.6rem;
+    font-style: italic;
   }
 
   pre {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    line-height: 1.6;
-    color: var(--ash);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    margin: 0;
     white-space: pre-wrap;
+    color: #222;
   }
 
-  .kw { color: #c792ea; }
-  .fn { color: var(--lime); }
-  .cm { color: var(--smoke); font-style: italic; }
-  .st { color: #c3e88d; }
-  .nm { color: #f78c6c; }
-
-  /* ── SCENARIO TABLE ── */
-  .scenario-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.5rem 0;
-    font-size: 0.88rem;
-  }
-
-  .scenario-table th {
-    background: rgba(90, 158, 94, 0.12);
-    color: var(--lime);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid rgba(90, 158, 94, 0.2);
-  }
-
-  .scenario-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid rgba(90, 158, 94, 0.08);
-    color: var(--ash);
-    vertical-align: top;
-  }
-
-  .scenario-table tr:last-child td { border-bottom: none; }
-
-  .risk-badge {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 3px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-
-  .risk-low  { background: rgba(90,158,94,0.15); color: var(--lime); }
-  .risk-high { background: rgba(192,57,43,0.15); color: #e74c3c; }
-  .risk-med  { background: rgba(224,123,57,0.15); color: var(--ember); }
-
-  /* ── FLOWCHART ── */
-  .flowchart-img {
-    width: 100%;
-    border: 1px solid rgba(90, 158, 94, 0.15);
-    border-radius: 6px;
-    margin: 1.5rem 0;
-    background: var(--bark);
-  }
-
-  /* ── TIMELINE ── */
+  /* Timeline */
   .timeline {
-    position: relative;
-    padding-left: 2rem;
-    margin: 1.5rem 0;
-  }
-
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 1px;
-    background: rgba(90, 158, 94, 0.2);
+    margin: 1rem 0;
+    padding-left: 1rem;
+    border-left: 3px solid #ccc;
   }
 
   .timeline-item {
-    position: relative;
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.5rem;
   }
 
-  .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -2rem;
-    top: 0.4rem;
-    width: 8px; height: 8px;
-    background: var(--leaf);
-    border-radius: 50%;
-    transform: translateX(-3.5px);
-  }
-
-  .timeline-week {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
+  .timeline-item .week {
+    font-family: Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #555;
     text-transform: uppercase;
-    color: var(--lime);
-    margin-bottom: 0.25rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.2rem;
   }
 
   .timeline-item h4 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--paper);
-    margin-bottom: 0.4rem;
+    margin: 0 0 0.3rem;
+    font-size: 1rem;
   }
 
-  .timeline-item p { font-size: 0.88rem; margin: 0; }
+  .timeline-item p {
+    font-size: 0.92rem;
+    color: #333;
+    margin: 0;
+  }
 
-  /* ── WORD COUNT TABLE ── */
-  .wc-table {
+  /* Info note */
+  .note {
+    background: #fffbea;
+    border-left: 4px solid #e0b040;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+    font-size: 0.9rem;
+  }
+
+  .note p { margin: 0; }
+
+  /* Flowchart image */
+  .flowchart-img {
     width: 100%;
-    border-collapse: collapse;
-    margin: 1rem 0;
-    font-size: 0.88rem;
+    border: 1px solid #ccc;
+    margin: 1.25rem 0;
   }
 
-  .wc-table th, .wc-table td {
-    padding: 0.6rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid rgba(90, 158, 94, 0.08);
+  /* References */
+  ol.refs {
+    font-size: 0.9rem;
+    padding-left: 1.5rem;
   }
 
-  .wc-table th {
-    background: rgba(90,158,94,0.08);
-    color: var(--lime);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+  ol.refs li {
+    margin-bottom: 0.6rem;
+    color: #333;
   }
 
-  .wc-table td { color: var(--ash); }
-
-  .wc-table tr.total td {
-    color: var(--paper);
-    font-weight: 600;
-    border-top: 1px solid rgba(90,158,94,0.2);
-    border-bottom: none;
+  /* Divider */
+  hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 2.5rem 0 0;
   }
 
-  /* ── REFS ── */
-  .ref-list {
-    list-style: none;
-    padding: 0;
-    margin: 1rem 0;
-  }
-
-  .ref-list li {
-    padding: 0.6rem 0;
-    border-bottom: 1px solid rgba(90,158,94,0.08);
-    font-size: 0.85rem;
-    color: var(--ash);
-    display: flex;
-    gap: 0.75rem;
-  }
-
-  .ref-num {
-    font-family: 'DM Mono', monospace;
-    color: var(--smoke);
-    font-size: 0.75rem;
-    min-width: 1.5rem;
-    padding-top: 0.05rem;
-  }
-
-  /* ── FOOTER ── */
+  /* Footer */
   footer {
-    border-top: 1px solid rgba(90,158,94,0.12);
-    padding: 2rem 4rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--smoke);
-    letter-spacing: 0.08em;
+    margin-top: 3rem;
+    border-top: 1px solid #ccc;
+    padding-top: 1rem;
+    font-family: Arial, sans-serif;
+    font-size: 0.8rem;
+    color: #777;
   }
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 700px) {
-    nav { padding: 0 1rem; }
-    .nav-links { display: none; }
-    .hero { padding: 5rem 1.5rem 3rem; }
-    section { padding: 3rem 1.5rem; }
-    .req-grid { grid-template-columns: 1fr; }
-    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  /* Responsive */
+  @media (max-width: 600px) {
+    body { padding: 1rem; }
+    h1 { font-size: 1.4rem; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<header>
+  <h1>Forest Wildfire Monitoring System</h1>
+  <p class="subtitle">Leaving Certificate Computer Science 2026 — Higher Level Coursework Project</p>
+</header>
+
 <nav>
-  <span class="nav-brand">// FOREST.MONITOR</span>
-  <ul class="nav-links">
-    <li><a href="#brief">Brief</a></li>
-    <li><a href="#investigation">Investigation</a></li>
-    <li><a href="#design">Design</a></li>
-    <li><a href="#create">Create</a></li>
-    <li><a href="#evaluation">Evaluation</a></li>
-    <li><a href="#references">References</a></li>
-  </ul>
+  <a href="#brief">Brief</a>
+  <a href="#investigation">Investigation</a>
+  <a href="#design">Design</a>
+  <a href="#create">Create</a>
+  <a href="#evaluation">Evaluation</a>
+  <a href="#references">References</a>
 </nav>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-bg"></div>
-  <div class="trees"></div>
-  <div class="hero-content">
-    <div class="hero-tag">LC Computer Science 2026 — Coursework Project</div>
-    <h1>Forest <em>Wildfire</em><br>Monitoring System</h1>
-    <p class="hero-sub">An embedded environmental monitoring system that simulates wildfire risk using real-time sensor data, an adaptive Python model, and a dynamic feedback loop that adjusts its own sensitivity over time.</p>
-    <div class="hero-meta">
-      <div class="meta-item">
-        <span class="meta-label">Platform</span>
-        <span class="meta-value">BBC micro:bit</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Languages</span>
-        <span class="meta-value">TypeScript + Python</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Level</span>
-        <span class="meta-value">Higher Level</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Theme</span>
-        <span class="meta-value">Wildfire Risk</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<hr class="divider">
-
-<!-- SECTION 1: MEETING THE BRIEF -->
+<!-- SECTION 1 -->
 <section id="brief">
-  <div class="section-tag">Section 01</div>
-  <h2>Meeting the Brief</h2>
+  <h2>1. Meeting the Brief</h2>
 
-  <!-- VIDEO -->
   <div class="video-block">
-    <div class="video-label">Artefact Demonstration — replace with your video file</div>
-    <!-- 
+    <!--
       TO ADD YOUR VIDEO:
-      Replace the placeholder below with:
+      Replace this block with:
       <video controls>
         <source src="demo.mp4" type="video/mp4">
       </video>
-      And put your video file (demo.mp4) in the same Report folder.
+      Put demo.mp4 in the same folder as this file.
     -->
-    <div class="video-placeholder">
-      <div class="play-icon">▶</div>
-      <span>Place your video file here — see comment in source code</span>
-      <span style="font-size:0.7rem; color: var(--smoke);">Max 5 minutes / 1GB — no individuals should be identifiable</span>
-    </div>
+    <p><strong> demonstration video</strong></p>
+  
   </div>
 
   <p>The following requirements from the project brief were addressed:</p>
 
-  <div class="req-grid">
-    <div class="req-card">
-      <span class="req-badge">Basic</span>
-      <div class="req-tick">✓</div>
-      <h4>Embedded System Design</h4>
-      <p>The BBC micro:bit uses Button A and Button B as digital inputs, and the built-in temperature sensor and light sensor as analogue inputs. The LED matrix and buzzer provide primary digital output.</p>
-    </div>
-    <div class="req-card">
-      <span class="req-badge">Basic</span>
-      <div class="req-tick">✓</div>
-      <h4>Data Collection</h4>
-      <p>Temperature, light level, rolling baseline, dynamic threshold, warning margin, fire risk score, and log interval are all written to the micro:bit datalogger every 1–4 seconds.</p>
-    </div>
-    <div class="req-card">
-      <span class="req-badge">Basic</span>
-      <div class="req-tick">✓</div>
-      <h4>Process Simulation</h4>
-      <p>The system simulates wildfire risk in a forest environment. High temperature and bright light (dry, sunny conditions) drive a fire risk score from 0 to 4. Critical risk triggers an alarm and exclamation display.</p>
-    </div>
-    <div class="req-card advanced">
-      <span class="req-badge advanced">Advanced</span>
-      <div class="req-tick" style="color:var(--ember)">✓</div>
-      <h4>Disaster Risk Modelling</h4>
-      <p>A Python model (<code>wildfire_model.py</code>) processes the collected data using the same adaptive algorithm as the micro:bit, producing risk scores across a full dataset and outputting results to CSV.</p>
-    </div>
-    <div class="req-card advanced">
-      <span class="req-badge advanced">Advanced</span>
-      <div class="req-tick" style="color:var(--ember)">✓</div>
-      <h4>What-If Simulations</h4>
-      <p>Two scenarios were tested: (1) a sudden +8°C heatwave and (2) a 40% increase in light intensity simulating canopy loss from deforestation. Both are described in the Create section.</p>
-    </div>
-    <div class="req-card advanced">
-      <span class="req-badge advanced">Advanced</span>
-      <div class="req-tick" style="color:var(--ember)">✓</div>
-      <h4>Adaptive System</h4>
-      <p>Both the micro:bit and the Python model use an exponential moving average to build a live baseline of "normal" temperature. Danger thresholds adapt relative to this baseline, and warning margins tighten or relax based on sustained conditions.</p>
-    </div>
-  </div>
+  <ul class="req-list">
+    <li>
+      <span class="badge">Basic</span> <strong>Embedded System Design</strong>
+      The BBC micro:bit uses Button A and Button B as digital inputs, and the built-in temperature and light sensors as analogue inputs. The LED matrix and buzzer provide primary digital output.
+    </li>
+    <li>
+      <span class="badge">Basic</span> <strong>Data Collection</strong>
+      Temperature, light level, rolling baseline, dynamic threshold, warning margin, fire risk score, and log interval are all written to the micro:bit datalogger every 1–4 seconds.
+    </li>
+    <li>
+      <span class="badge">Basic</span> <strong>Process Simulation</strong>
+      The system simulates wildfire risk in a forest environment. High temperature and bright light drive a fire risk score from 0 to 4. Critical risk triggers an alarm and exclamation display.
+    </li>
+    <li>
+      <span class="badge advanced">Advanced</span> <strong>Disaster Risk Modelling</strong>
+      A Python model (<code>wildfire_model.py</code>) processes the collected data using the same adaptive algorithm as the micro:bit, producing risk scores across a full dataset and outputting results to CSV.
+    </li>
+    <li>
+      <span class="badge advanced">Advanced</span> <strong>What-If Simulations</strong>
+      Two scenarios were tested: (1) a sudden +8°C heatwave and (2) a 40% increase in light intensity simulating canopy loss from deforestation.
+    </li>
+    <li>
+      <span class="badge advanced">Advanced</span> <strong>Adaptive System</strong>
+      Both the micro:bit and the Python model use an exponential moving average to maintain a live baseline of normal temperature. Danger thresholds adapt relative to this baseline, and warning margins tighten or relax based on sustained conditions.
+    </li>
+  </ul>
 </section>
 
-<hr class="divider">
+<hr>
 
-<!-- SECTION 2: INVESTIGATION -->
+<!-- SECTION 2 -->
 <section id="investigation">
-  <div class="section-tag">Section 02</div>
-  <h2>Investigation</h2>
+  <h2>2. Investigation</h2>
 
-  <p>Researching this topic began with understanding how real-world wildfire early warning systems work. The Bosch Forest Fire Detection System [1] uses a network of environmental sensors that monitor temperature, humidity, and gas concentration. Unlike simple threshold-based alarms, these systems use machine learning models trained on historical data to detect anomalous conditions before a fire spreads. This was an important insight: reacting to a fixed temperature is not the same as detecting danger relative to context.</p>
+  <p>Research began with understanding how real-world wildfire early warning systems work. The Bosch Forest Fire Detection System [1] uses a network of environmental sensors monitoring temperature, humidity, and gas concentration. Unlike simple threshold-based alarms, these systems use models trained on historical data to detect anomalous conditions before a fire spreads. This was a key insight: reacting to a fixed temperature is not the same as detecting danger relative to context.</p>
 
-  <p>The WWF Guianas early warning network [2] takes a similar approach, emphasising how detecting <em>rate of change</em> matters more than absolute values. A forest that is normally warm will have a different danger profile to one that is usually cool — the same temperature could be perfectly safe in one and critical in the other. This directly influenced the decision to use a rolling baseline rather than a hardcoded threshold in this project.</p>
+  <p>The WWF Guianas early warning network [2] emphasises how detecting <em>rate of change</em> matters more than absolute values. A forest that is normally warm has a different danger profile to one that is usually cool — the same temperature could be safe in one and critical in the other. This directly influenced the decision to use a rolling baseline rather than a hardcoded threshold.</p>
 
-  <p>Research into existing micro:bit environmental projects [3] confirmed that the built-in temperature and light sensors, while not research-grade instruments, are sufficient for simulating environmental monitoring logic. Several examples online used fixed thresholds (e.g. "if temperature > 30, alert") but none implemented adaptive baselines on the device itself.</p>
+  <p>Research into existing micro:bit environmental projects [3] confirmed that the built-in temperature and light sensors, while not research-grade, are sufficient for simulating environmental monitoring logic. Several examples used fixed thresholds (e.g. "if temperature > 30, alert") but none implemented adaptive baselines on the device itself.</p>
 
-  <p>The EU Climate Change website [4] provided context on how deforestation and rising temperatures interact with wildfire risk — specifically that canopy loss increases the amount of direct sunlight reaching the forest floor, drying ground vegetation and dramatically raising fire probability. This directly motivated the second what-if scenario in the Python model.</p>
+  <p>The EU Climate Change website [4] provided context on how deforestation and rising temperatures interact with wildfire risk — specifically that canopy loss increases direct sunlight reaching the forest floor, drying ground vegetation and raising fire probability. This directly motivated the second what-if scenario in the Python model.</p>
 
-  <p>Based on this research, the key design decisions were: to use a rolling average to define "normal" dynamically, to combine both temperature and light as risk factors (since real wildfire risk depends on both heat and dry conditions), and to build the Python model as a virtual extension of the same adaptive logic running on the device.</p>
+  <p>Based on this research, the key design decisions were: to use a rolling average to define "normal" dynamically; to combine temperature and light as risk factors; and to build the Python model as an offline extension of the same adaptive logic running on the device.</p>
 </section>
 
-<hr class="divider">
+<hr>
 
-<!-- SECTION 3: PLAN AND DESIGN -->
+<!-- SECTION 3 -->
 <section id="design">
-  <div class="section-tag">Section 03</div>
-  <h2>Plan and Design</h2>
+  <h2>3. Plan and Design</h2>
 
   <h3>Design Objectives</h3>
-  <p>The system needed to meet all basic and advanced requirements of the brief while remaining achievable on a BBC micro:bit — a device with no network connectivity, limited memory, and a 5×5 LED display. The core design objective was to build something genuinely adaptive rather than simply reactive: a system that adjusts its own model of the environment rather than comparing readings to fixed numbers.</p>
+  <p>The system needed to meet all basic and advanced requirements while remaining achievable on a BBC micro:bit — a device with no network connectivity, limited memory, and a 5×5 LED display. The core design objective was to build something genuinely adaptive: a system that adjusts its own model of the environment rather than comparing readings to fixed numbers.</p>
 
   <h3>Options Considered</h3>
-  <p>Initially, a simple threshold system was implemented (alert if temperature exceeds 35°C). This was rejected because it does not account for ambient conditions — 33°C might be normal on a hot summer afternoon but dangerous if the baseline is 20°C. The exponential moving average approach was chosen because it is computationally cheap enough to run on the micro:bit in a continuous loop, requires no extra memory storage, and produces a genuinely adaptive baseline.</p>
-
+  <p>Initially, a simple threshold system was implemented (alert if temperature exceeds 35°C). This was rejected because it does not account for ambient conditions — 33°C might be normal on a hot afternoon but dangerous if the usual baseline is 20°C. The exponential moving average approach was chosen because it is cheap enough to run on the micro:bit in a continuous loop and produces a genuinely adaptive baseline without extra memory storage.</p>
   <p>A Raspberry Pi was considered as an alternative platform but rejected — the micro:bit is sufficient for the sensors required and is more relevant to the embedded systems brief.</p>
 
   <h3>Stakeholders and End User Needs</h3>
-  <p>The primary end user is a forest ranger or environmental monitoring officer who needs to be alerted to dangerous conditions quickly and clearly. This shaped two design decisions: the LED display must be readable at a glance (simple iconic symbols rather than numbers), and the alarm must be audible. A secondary user is a data analyst who would use the logged CSV data and Python model outputs to review historical risk patterns and test scenarios. Their need is for comprehensive, well-labelled data — which is why seven variables are logged per reading including the internal model state.</p>
+  <p>The primary end user is a forest ranger or environmental monitoring officer who needs to be alerted quickly and clearly. This shaped two decisions: the LED display must be readable at a glance (simple iconic symbols), and the alarm must be audible. A secondary user is a data analyst who would use the logged CSV data and Python model outputs to review historical risk patterns. Their need is for comprehensive, well-labelled data — which is why seven variables are logged per reading, including internal model state.</p>
 
   <h3>Technologies</h3>
-  <p>The embedded system uses MakeCode TypeScript on the BBC micro:bit, which provides built-in access to the temperature sensor, light sensor, LED matrix, buzzer, buttons, and datalogger. The computer model is written in Python 3 using only the standard library (csv, os, random, math) so it can be run without installing any packages. This ensures the examiner can run it without any setup.</p>
+  <p>The embedded system uses MakeCode TypeScript on the BBC micro:bit, providing built-in access to the temperature sensor, light sensor, LED matrix, buzzer, buttons, and datalogger. The computer model is written in Python 3 using only the standard library (csv, os, random, math) so it can be run without installing any packages.</p>
 
   <h3>System Architecture</h3>
-  <p>The system has three concurrent components on the micro:bit and one offline Python model:</p>
+  <p>The system has three concurrent sections on the micro:bit and one offline Python model:</p>
 
   <img src="flowchart.png" alt="System flowchart showing main loop, logging loop, button handlers and Python model" class="flowchart-img">
-  <!-- 
-    NOTE: Copy the flowchart.png file from the Artefact folder into the Report folder,
-    or adjust the src path accordingly.
-  -->
-
-  <p style="font-size:0.8rem; color:var(--smoke); text-align:center; margin-top:-0.5rem;">Figure 1 — Program flowchart. Three concurrent micro:bit sections feed into an offline Python model.</p>
+  <p style="font-size:0.85rem; color:#555; text-align:center; margin-top:-0.75rem;">Figure 1 — Program flowchart. Three concurrent micro:bit sections feed into an offline Python model.</p>
 
   <h3>Adaptive Feedback Loop Design</h3>
-  <p>The core adaptive loop was designed as: <strong>Sense → Update model → Recalculate thresholds → Score risk → Adapt margins → Respond → Log → repeat.</strong> The key innovation is that the warning margins themselves change over time — sustained high risk tightens them (more sensitive), sustained calm relaxes them — meaning the system's behaviour emerges from the data it collects rather than from hardcoded rules.</p>
+  <p>The core adaptive loop was designed as: <strong>Sense → Update model → Recalculate thresholds → Score risk → Adapt margins → Respond → Log → repeat.</strong> The warning margins themselves change over time — sustained high risk tightens them (more sensitive), sustained calm relaxes them — so the system's behaviour emerges from its own collected data rather than from hardcoded rules.</p>
 </section>
 
-<hr class="divider">
+<hr>
 
-<!-- SECTION 4: CREATE -->
+<!-- SECTION 4 -->
 <section id="create">
-  <div class="section-tag">Section 04</div>
-  <h2>Create</h2>
+  <h2>4. Create</h2>
 
   <h3>Development Milestones</h3>
   <div class="timeline">
     <div class="timeline-item">
-      <div class="timeline-week">Week 1–2</div>
+      <div class="week">Week 1–2</div>
       <h4>Basic Sensor Reading and Display</h4>
       <p>Initial micro:bit code read temperature and displayed it on button press. Light level reading added. Simple threshold alert (temp > 35°C = exclamation mark) implemented and tested.</p>
     </div>
     <div class="timeline-item">
-      <div class="timeline-week">Week 3–4</div>
+      <div class="week">Week 3–4</div>
       <h4>Logic Bug Fixes</h4>
-      <p>Three significant logic errors identified: the light variable was only read once at startup and never updated; the else-if chain meant the freezing condition and temperature drop detection were unreachable; and the temperature drop check was inside the same chain as the rise check, preventing both from triggering. All were corrected by restructuring into separate if-blocks and moving sensor reads into the loop.</p>
+      <p>Three significant logic errors identified: the light variable was only read once at startup; the else-if chain made the freezing condition and temperature drop detection unreachable; and the temperature drop check was inside the same chain as the rise check, preventing both from triggering. All were corrected by restructuring into separate if-blocks and moving sensor reads into the loop.</p>
     </div>
     <div class="timeline-item">
-      <div class="timeline-week">Week 5–6</div>
+      <div class="week">Week 5–6</div>
       <h4>Adaptive Model Implementation</h4>
       <p>Replaced the fixed 35°C threshold with an exponential moving average baseline. Dynamic thresholds calculated from the baseline. Fire risk score (0–4) introduced combining temperature and light. Warning margin adaptation added based on alertCount and allClearCount.</p>
     </div>
     <div class="timeline-item">
-      <div class="timeline-week">Week 7–8</div>
+      <div class="week">Week 7–8</div>
       <h4>Logging and Display Modes</h4>
       <p>Datalogger integrated with seven variables per reading. Adaptive log interval implemented (1–4 seconds by risk level). Button B display cycle (displayMode counter with modulo) added to show T, R, B, and TH readings on demand.</p>
     </div>
     <div class="timeline-item">
-      <div class="timeline-week">Week 9–10</div>
+      <div class="week">Week 9–10</div>
       <h4>Python Model and What-If Scenarios</h4>
       <p>Python model written to replicate the adaptive algorithm offline. Two what-if scenarios implemented: sudden heatwave (+8°C with freeze_baseline=True) and canopy loss (light ×1.4). Results compared in a final output table.</p>
     </div>
     <div class="timeline-item">
-      <div class="timeline-week">Week 11–12</div>
+      <div class="week">Week 11–12</div>
       <h4>Testing and Report</h4>
-      <p>Final testing of all branches. Report website written. Video recorded demonstrating all features.</p>
+      <p>Final testing of all branches. Report written. Video recorded demonstrating all features.</p>
     </div>
   </div>
 
   <h3>Testing</h3>
-  <p>Testing was carried out throughout development. For the micro:bit, the temperature sensor was tested by warming the device with a hand to trigger the alert condition and checking that the alarm fired correctly. The Button A light modes were tested in a dark room (torch off), dim light (torch through paper), normal room light, and direct bright light. The rolling average was verified by watching the B: display value shift gradually over several minutes as ambient temperature changed, confirming the baseline was updating correctly rather than staying fixed.</p>
-
-  <p>For the Python model, the three scenarios were verified by checking that the baseline scenario produced a low average risk on realistic data, that the heatwave scenario with freeze_baseline produced a large number of critical events (confirming the frozen baseline was working correctly), and that the canopy loss scenario increased high-light events by the expected proportion.</p>
+  <p>Testing was carried out throughout development. For the micro:bit, the temperature sensor was tested by warming the device with a hand to trigger the alert condition and checking that the alarm fired correctly. The Button A light modes were tested in a dark room, dim light, normal room light, and direct bright light. The rolling average was verified by watching the B: display value shift gradually over several minutes as ambient temperature changed.</p>
+  <p>For the Python model, the three scenarios were verified by checking that the baseline produced a low average risk on realistic data, that the heatwave scenario with freeze_baseline produced a large number of critical events, and that the canopy loss scenario increased high-light events by the expected proportion.</p>
 
   <h3>A Problem Encountered</h3>
-  <p>The most significant problem was the unreachable condition bug in the temperature display logic. The original code had a chain of else-if blocks checking: temperature &gt; 35, then temperature &lt; 35, then temperature &lt; 0, then temperature &lt; previoustemp − 3. Because temperature &lt; 35 catches every value below 35, the checks for below zero and for temperature drops could never be reached — the second condition in the chain swallowed everything. The fix was to separate the conditions into independent if-blocks and reorder them so that the most specific check (below zero) came before the general check (below 35). This was identified by manually tracing through the code with test values (e.g. −2°C) and noting that the freezing icon never appeared.</p>
+  <p>The most significant problem was an unreachable condition bug in the temperature display logic. The original code had a chain of else-if blocks checking: temperature > 35, then temperature < 35, then temperature < 0, then temperature drop. Because temperature < 35 catches every value below 35, the checks for below zero and for temperature drops could never be reached. The fix was to separate the conditions into independent if-blocks and reorder them so the most specific check (below zero) came before the general check (below 35). This was identified by manually tracing through the code with test values (e.g. −2°C) and noting that the freezing icon never appeared.</p>
 
   <h3>The Python Model</h3>
-  <p>The Python model (<code>wildfire_model.py</code>) processes a dataset of environmental readings — either exported from the micro:bit datalogger as a CSV, or a built-in simulated dataset if no file is present. It runs the same adaptive algorithm as the micro:bit: exponential moving average baseline, dynamic thresholds, fire risk scoring, and margin adaptation. The key function is <code>run_model()</code>, which accepts a <code>temp_offset</code>, a <code>light_multiplier</code>, and a <code>freeze_baseline</code> flag to configure each scenario.</p>
+  <p>The Python model processes a dataset of environmental readings — either exported from the micro:bit datalogger as a CSV, or a built-in simulated dataset if no file is present. It runs the same adaptive algorithm as the micro:bit: exponential moving average baseline, dynamic thresholds, fire risk scoring, and margin adaptation. The key function is <code>run_model()</code>, which accepts a <code>temp_offset</code>, a <code>light_multiplier</code>, and a <code>freeze_baseline</code> flag to configure each scenario.</p>
 
   <h3>What-If Scenarios</h3>
-  <table class="scenario-table">
+  <table>
     <thead>
       <tr>
         <th>Scenario</th>
@@ -826,103 +444,100 @@
       <tr>
         <td><strong>Baseline</strong></td>
         <td>No change</td>
-        <td><span class="risk-badge risk-low">0.78 / 4</span></td>
+        <td>0.78 / 4</td>
         <td>0</td>
         <td>26.2°C</td>
       </tr>
       <tr>
         <td><strong>Scenario 1 — Heatwave</strong></td>
         <td>Temperature +8°C (sudden, baseline frozen)</td>
-        <td><span class="risk-badge risk-high">3.33 / 4</span></td>
+        <td>3.33 / 4</td>
         <td>111</td>
         <td>34.2°C</td>
       </tr>
       <tr>
         <td><strong>Scenario 2 — Canopy Loss</strong></td>
         <td>Light level ×1.4 (deforestation)</td>
-        <td><span class="risk-badge risk-med">0.90 / 4</span></td>
+        <td>0.90 / 4</td>
         <td>0</td>
         <td>26.2°C</td>
       </tr>
       <tr>
         <td><strong>Combined</strong></td>
         <td>Both above together</td>
-        <td><span class="risk-badge risk-high">3.45 / 4</span></td>
+        <td>3.45 / 4</td>
         <td>111</td>
         <td>34.2°C</td>
       </tr>
     </tbody>
   </table>
 
-  <p>Scenario 1 uses <code>freeze_baseline=True</code> to model a sudden unexpected heatwave before the system has had time to recalibrate — this represents the most dangerous real-world case and shows the adaptive model's sensitivity clearly. Scenario 2 simulates deforestation removing tree canopy, increasing the direct sunlight reaching the forest floor and pushing more readings above the 170 light threshold, which adds to the fire risk score. The combined scenario shows that heatwave and canopy loss together produce a worst-case outcome significantly worse than either alone.</p>
+  <p>Scenario 1 uses <code>freeze_baseline=True</code> to model a sudden unexpected heatwave before the system has had time to recalibrate — this represents the most dangerous real-world case. Scenario 2 simulates deforestation removing tree canopy, increasing the direct sunlight reaching the forest floor and pushing more readings above the light threshold. The combined scenario shows that heatwave and canopy loss together produce a worst-case outcome significantly worse than either alone.</p>
 
   <div class="code-block">
     <div class="code-label">Python — core adaptive algorithm (run_model function)</div>
-    <pre><span class="cm"># Exponential moving average — baseline shifts gradually</span>
-<span class="kw">if not</span> freeze_baseline:
-    rolling_avg = rolling_avg * <span class="nm">0.9</span> + temp * <span class="nm">0.1</span>
+    <pre># Exponential moving average — baseline shifts gradually
+if not freeze_baseline:
+    rolling_avg = rolling_avg * 0.9 + temp * 0.1
 
-<span class="cm"># Dynamic thresholds derived from live baseline</span>
+# Dynamic thresholds derived from live baseline
 warning_threshold = rolling_avg + warning_margin
 critical_threshold = rolling_avg + critical_margin
 
-<span class="cm"># Score fire risk relative to context, not hardcoded numbers</span>
-risk = <span class="nm">0</span>
-<span class="kw">if</span> temp > rolling_avg + <span class="nm">2</span>:  risk += <span class="nm">1</span>
-<span class="kw">if</span> temp > warning_threshold: risk += <span class="nm">1</span>
-<span class="kw">if</span> temp > critical_threshold: risk += <span class="nm">1</span>
-<span class="kw">if</span> light > <span class="nm">170</span>:             risk += <span class="nm">1</span>
+# Score fire risk relative to context, not hardcoded numbers
+risk = 0
+if temp > rolling_avg + 2:   risk += 1
+if temp > warning_threshold: risk += 1
+if temp > critical_threshold: risk += 1
+if light > 170:              risk += 1
 
-<span class="cm"># Adapt margins based on sustained conditions (the feedback loop)</span>
-<span class="kw">if</span> risk >= <span class="nm">3</span>:
-    alert_count += <span class="nm">1</span>
-    <span class="kw">if</span> alert_count >= <span class="nm">4</span> <span class="kw">and</span> warning_margin > <span class="nm">2</span>:
-        warning_margin -= <span class="nm">1</span>   <span class="cm"># become more sensitive</span>
-<span class="kw">elif</span> risk == <span class="nm">0</span>:
-    all_clear_count += <span class="nm">1</span>
-    <span class="kw">if</span> all_clear_count >= <span class="nm">6</span> <span class="kw">and</span> warning_margin &lt; <span class="nm">7</span>:
-        warning_margin += <span class="nm">1</span>   <span class="cm"># relax back toward normal</span></pre>
+# Adapt margins based on sustained conditions (the feedback loop)
+if risk >= 3:
+    alert_count += 1
+    if alert_count >= 4 and warning_margin > 2:
+        warning_margin -= 1   # become more sensitive
+elif risk == 0:
+    all_clear_count += 1
+    if all_clear_count >= 6 and warning_margin < 7:
+        warning_margin += 1   # relax back toward normal</pre>
   </div>
 </section>
 
-<hr class="divider">
+<hr>
 
-<!-- SECTION 5: EVALUATION -->
+<!-- SECTION 5 -->
 <section id="evaluation">
-  <div class="section-tag">Section 05</div>
-  <h2>Evaluation</h2>
+  <h2>5. Evaluation</h2>
 
   <p>The final artefact successfully meets all basic and advanced requirements of the brief. The embedded system collects real environmental data, simulates wildfire risk, and adapts its own sensitivity based on sustained conditions. The Python model extends this to a full dataset analysis with two meaningful what-if scenarios that produce clearly different and explainable outcomes.</p>
 
   <p>The adaptive model performs well as a concept: the exponential moving average correctly shifts the baseline over time, and the margin adaptation demonstrably changes the system's behaviour under sustained alerts. The logged data includes the internal model state (warning_margin, rolling baseline, dynamic threshold), which makes the adaptation visible and verifiable — an examiner can open the CSV and see the margins change over the course of a run.</p>
 
-  <p>There are clear limitations. The micro:bit temperature sensor is affected by the heat generated by the device itself, which introduces a small upward bias in readings. The light sensor is affected by the angle at which the device is held. In a real deployment, calibrated external sensors would be used. Additionally, the current model uses temperature and light as proxies for wildfire risk, but a more complete model would also include humidity and wind speed — both of which significantly affect real fire spread.</p>
+  <p>There are clear limitations. The micro:bit temperature sensor is affected by heat generated by the device itself, which introduces a small upward bias in readings. The light sensor is affected by the angle at which the device is held. In a real deployment, calibrated external sensors would be used. The current model also uses temperature and light as proxies for wildfire risk, but a more complete model would include humidity and wind speed — both of which significantly affect real fire spread.</p>
 
   <h3>Future Improvements</h3>
-  <p>The most valuable next iteration would be to connect the micro:bit to external sensors via the GPIO pins — particularly a DHT22 humidity sensor and a soil moisture sensor. Humidity is arguably more important than temperature alone for wildfire risk assessment, since dry vegetation is what actually burns. Soil moisture would allow the model to simulate drought cycle detection, which is another key brief example.</p>
-
-  <p>The Python model could be extended with a time-series prediction component — using the rolling average trend to forecast where the baseline is heading and flag risk before it arrives, rather than only scoring current conditions. This would make it genuinely predictive rather than just descriptive, which would strengthen the advanced requirements further.</p>
+  <p>The most valuable next step would be to connect external sensors via the GPIO pins — particularly a DHT22 humidity sensor and a soil moisture sensor. Humidity is arguably more important than temperature alone for wildfire risk, since dry vegetation is what actually burns. Soil moisture would allow the model to simulate drought cycle detection, another key example from the brief.</p>
+  <p>The Python model could also be extended with a time-series prediction component — using the rolling average trend to forecast where the baseline is heading and flag risk before it arrives, rather than only scoring current conditions.</p>
 </section>
 
-<hr class="divider">
+<hr>
 
-<!-- SECTION 6: REFERENCES -->
+<!-- SECTION 6 -->
 <section id="references">
-  <div class="section-tag">Section 06</div>
-  <h2>References</h2>
+  <h2>6. References</h2>
 
-  <ul class="ref-list">
-    <li><span class="ref-num">[1]</span>Bosch (2023). <em>Early forest fire detection sensors.</em> Available at: https://www.bosch.com/stories/early-forest-fire-detection-sensors/</li>
-    <li><span class="ref-num">[2]</span>WWF Guianas (2022). <em>Early Warning System for Wildfire Monitoring.</em> Available at: https://www.wwfguianas.org/our_work22/forest/early_warning_system/</li>
-    <li><span class="ref-num">[3]</span>micro:bit Educational Foundation (2020). <em>Make a micro:bit weather station.</em> Available at: https://microbit.org/news/2020-07-06/make-a-microbit-weather-station/</li>
-    <li><span class="ref-num">[4]</span>European Commission (2023). <em>Causes of Climate Change.</em> Available at: https://climate.ec.europa.eu/climate-change/causes-climate-change_en</li>
-    <li><span class="ref-num">[5]</span>Climate Council of Australia (2023). <em>Deforestation and Climate Change.</em> Available at: https://www.climatecouncil.org.au/deforestation/</li>
-    <li><span class="ref-num">[6]</span>UN-SPIDER (2022). <em>Global Early Warning System for Wildland Fires.</em> Available at: https://www.un-spider.org/global-early-warning-system-wildland-fires-global-ews</li>
-    <li><span class="ref-num">[7]</span>State Examinations Commission (2025). <em>Leaving Certificate 2026 Computer Science Coursework Project Brief.</em></li>
-  </ul>
+  <ol class="refs">
+    <li>Bosch (2023). <em>Early forest fire detection sensors.</em> Available at: https://www.bosch.com/stories/early-forest-fire-detection-sensors/</li>
+    <li>WWF Guianas (2022). <em>Early Warning System for Wildfire Monitoring.</em> Available at: https://www.wwfguianas.org/our_work22/forest/early_warning_system/</li>
+    <li>micro:bit Educational Foundation (2020). <em>Make a micro:bit weather station.</em> Available at: https://microbit.org/news/2020-07-06/make-a-microbit-weather-station/</li>
+    <li>European Commission (2023). <em>Causes of Climate Change.</em> Available at: https://climate.ec.europa.eu/climate-change/causes-climate-change_en</li>
+    <li>Climate Council of Australia (2023). <em>Deforestation and Climate Change.</em> Available at: https://www.climatecouncil.org.au/deforestation/</li>
+    <li>UN-SPIDER (2022). <em>Global Early Warning System for Wildland Fires.</em> Available at: https://www.un-spider.org/global-early-warning-system-wildland-fires-global-ews</li>
+    <li>State Examinations Commission (2025). <em>Leaving Certificate 2026 Computer Science Coursework Project Brief.</em></li>
+  </ol>
 
   <h3>Word Count</h3>
-  <table class="wc-table">
+  <table>
     <thead>
       <tr><th>Section</th><th>Word Count</th></tr>
     </thead>
@@ -935,14 +550,11 @@ risk = <span class="nm">0</span>
       <tr class="total"><td>Total</td><td>~1900</td></tr>
     </tbody>
   </table>
-  <p style="font-size:0.8rem; color:var(--smoke);">Note: Update word counts to exact figures before submission. Total is well within the 2500 word limit, leaving room for any additional content you add.</p>
+  <p style="font-size:0.85rem; color:#666;">Note: Update word counts to exact figures before submission. Total is well within the 2500 word limit.</p>
 </section>
 
-<hr class="divider">
-
 <footer>
-  <span>Forest Wildfire Monitoring System — LC Computer Science 2026</span>
-  <span>Higher Level</span>
+  <p>Forest Wildfire Monitoring System — LC Computer Science 2026 — Higher Level</p>
 </footer>
 
 </body>
