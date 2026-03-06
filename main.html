@@ -16,7 +16,6 @@
     padding: 2rem 1.5rem 4rem;
   }
 
-  /* Header */
   header {
     border-bottom: 2px solid #222;
     padding-bottom: 1rem;
@@ -36,7 +35,6 @@
     margin: 0 0 0.25rem;
   }
 
-  /* Nav */
   nav {
     margin-bottom: 2.5rem;
     font-family: Arial, sans-serif;
@@ -53,7 +51,6 @@
     text-decoration: underline;
   }
 
-  /* Section headings */
   h2 {
     font-size: 1.35rem;
     font-weight: bold;
@@ -72,61 +69,19 @@
     margin: 0 0 1rem;
   }
 
-  /* Video placeholder */
-  .video-block {
-    border: 1px solid #bbb;
-    background: #f5f5f5;
-    padding: 2rem;
-    text-align: center;
-    margin: 1.5rem 0;
-    font-family: Arial, sans-serif;
-    font-size: 0.9rem;
-    color: #555;
-  }
-
-  .video-block p { margin: 0.25rem 0; }
-
-  video {
-    width: 100%;
-    display: block;
-  }
-
-  /* Requirements list */
-  .req-list {
+  ul.req-list {
     margin: 1rem 0 1rem 1.5rem;
     padding: 0;
   }
 
-  .req-list li {
+  ul.req-list li {
     margin-bottom: 1rem;
   }
 
-  .req-list li strong {
+  ul.req-list li strong {
     display: block;
   }
 
-  .badge {
-    display: inline-block;
-    font-family: Arial, sans-serif;
-    font-size: 0.72rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background: #eee;
-    border: 1px solid #bbb;
-    padding: 0.1rem 0.45rem;
-    border-radius: 3px;
-    margin-right: 0.4rem;
-    vertical-align: middle;
-  }
-
-  .badge.advanced {
-    background: #fff3e0;
-    border-color: #d4840a;
-    color: #a35c00;
-  }
-
-  /* Tables */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -158,7 +113,6 @@
     background: #f0f0f0;
   }
 
-  /* Code block */
   .code-block {
     background: #f7f7f7;
     border: 1px solid #ccc;
@@ -185,7 +139,6 @@
     color: #222;
   }
 
-  /* Timeline */
   .timeline {
     margin: 1rem 0;
     padding-left: 1rem;
@@ -217,25 +170,12 @@
     margin: 0;
   }
 
-  /* Info note */
-  .note {
-    background: #fffbea;
-    border-left: 4px solid #e0b040;
-    padding: 0.75rem 1rem;
-    margin: 1.25rem 0;
-    font-size: 0.9rem;
-  }
-
-  .note p { margin: 0; }
-
-  /* Flowchart image */
   .flowchart-img {
     width: 100%;
     border: 1px solid #ccc;
     margin: 1.25rem 0;
   }
 
-  /* References */
   ol.refs {
     font-size: 0.9rem;
     padding-left: 1.5rem;
@@ -246,14 +186,12 @@
     color: #333;
   }
 
-  /* Divider */
   hr {
     border: none;
     border-top: 1px solid #ddd;
     margin: 2.5rem 0 0;
   }
 
-  /* Footer */
   footer {
     margin-top: 3rem;
     border-top: 1px solid #ccc;
@@ -263,7 +201,6 @@
     color: #777;
   }
 
-  /* Responsive */
   @media (max-width: 600px) {
     body { padding: 1rem; }
     h1 { font-size: 1.4rem; }
@@ -290,45 +227,32 @@
 <section id="brief">
   <h2>1. Meeting the Brief</h2>
 
-  <div class="video-block">
-    <!--
-      TO ADD YOUR VIDEO:
-      Replace this block with:
-      <video controls>
-        <source src="demo.mp4" type="video/mp4">
-      </video>
-      Put demo.mp4 in the same folder as this file.
-    -->
-    <p><strong> demonstration video</strong></p>
-  
-  </div>
-
   <p>The following requirements from the project brief were addressed:</p>
 
   <ul class="req-list">
     <li>
-      <span class="badge">Basic</span> <strong>Embedded System Design</strong>
-      The BBC micro:bit uses Button A and Button B as digital inputs, and the built-in temperature and light sensors as analogue inputs. The LED matrix and buzzer provide primary digital output.
+      <strong>Embedded System Design</strong>
+      The BBC micro:bit uses Button A and Button B as digital inputs, and the built-in temperature and light sensors as analogue inputs. The LED matrix and buzzer provide primary digital output. Button A displays a light level icon on demand; Button B shows the current temperature. The system starts automatically and runs continuously once powered on.
     </li>
     <li>
-      <span class="badge">Basic</span> <strong>Data Collection</strong>
-      Temperature, light level, rolling baseline, dynamic threshold, warning margin, fire risk score, and log interval are all written to the micro:bit datalogger every 1–4 seconds.
+      <strong>Data Collection</strong>
+      Temperature and light level are read every cycle and written to the micro:bit datalogger every three seconds, producing a timestamped log of environmental readings throughout the session.
     </li>
     <li>
-      <span class="badge">Basic</span> <strong>Process Simulation</strong>
-      The system simulates wildfire risk in a forest environment. High temperature and bright light drive a fire risk score from 0 to 4. Critical risk triggers an alarm and exclamation display.
+      <strong>Process Simulation</strong>
+      The system simulates wildfire risk in a forest environment. A fixed temperature threshold (35°C) triggers a critical alarm with an exclamation mark on the LED display and a repeating alarm tone. Temperatures below freezing display an X icon, and sudden changes of more than 3°C in a single cycle display a directional arrow to indicate a spike or drop.
     </li>
     <li>
-      <span class="badge advanced">Advanced</span> <strong>Disaster Risk Modelling</strong>
-      A Python model (<code>wildfire_model.py</code>) processes the collected data using the same adaptive algorithm as the micro:bit, producing risk scores across a full dataset and outputting results to CSV.
+      <strong>Disaster Risk Modelling</strong>
+      A Python model (<code>wildfire_model.py</code>) accepts sensor readings entered by the user, reconstructs a temperature and light data series from those values, and runs an adaptive wildfire risk algorithm across the full dataset, outputting results to CSV files.
     </li>
     <li>
-      <span class="badge advanced">Advanced</span> <strong>What-If Simulations</strong>
-      Two scenarios were tested: (1) a sudden +8°C heatwave and (2) a 40% increase in light intensity simulating canopy loss from deforestation.
+      <strong>What-If Simulations</strong>
+      Two scenarios were tested: (1) a sudden +8°C heatwave with the baseline frozen to simulate an unexpected temperature event, and (2) a 40% increase in light intensity simulating canopy loss from deforestation.
     </li>
     <li>
-      <span class="badge advanced">Advanced</span> <strong>Adaptive System</strong>
-      Both the micro:bit and the Python model use an exponential moving average to maintain a live baseline of normal temperature. Danger thresholds adapt relative to this baseline, and warning margins tighten or relax based on sustained conditions.
+      <strong>Adaptive System</strong>
+      The Python model uses an exponential moving average to maintain a live baseline of normal temperature. Warning and critical thresholds are derived from this baseline rather than hardcoded. Warning margins tighten after sustained high-risk readings and relax after a period of calm, giving the model a feedback loop that adjusts its own sensitivity over time.
     </li>
   </ul>
 </section>
@@ -341,13 +265,13 @@
 
   <p>Research began with understanding how real-world wildfire early warning systems work. The Bosch Forest Fire Detection System [1] uses a network of environmental sensors monitoring temperature, humidity, and gas concentration. Unlike simple threshold-based alarms, these systems use models trained on historical data to detect anomalous conditions before a fire spreads. This was a key insight: reacting to a fixed temperature is not the same as detecting danger relative to context.</p>
 
-  <p>The WWF Guianas early warning network [2] emphasises how detecting <em>rate of change</em> matters more than absolute values. A forest that is normally warm has a different danger profile to one that is usually cool — the same temperature could be safe in one and critical in the other. This directly influenced the decision to use a rolling baseline rather than a hardcoded threshold.</p>
+  <p>The WWF Guianas early warning network [2] emphasises how detecting rate of change matters more than absolute values. A forest that is normally warm has a different danger profile to one that is usually cool — the same temperature could be safe in one and critical in the other. This directly influenced the decision to include sudden change detection in the embedded system, where a rise or fall of more than 3°C in a single cycle triggers a directional arrow even if the overall risk level has not changed.</p>
 
-  <p>Research into existing micro:bit environmental projects [3] confirmed that the built-in temperature and light sensors, while not research-grade, are sufficient for simulating environmental monitoring logic. Several examples used fixed thresholds (e.g. "if temperature > 30, alert") but none implemented adaptive baselines on the device itself.</p>
+  <p>Research into existing micro:bit environmental projects [3] confirmed that the built-in temperature and light sensors, while not research-grade, are sufficient for simulating environmental monitoring logic. Several examples used fixed thresholds (e.g. "if temperature > 30, alert") which is the approach used in the embedded system here, with the more sophisticated adaptive logic reserved for the Python model where it can operate over a full dataset.</p>
 
-  <p>The EU Climate Change website [4] provided context on how deforestation and rising temperatures interact with wildfire risk — specifically that canopy loss increases direct sunlight reaching the forest floor, drying ground vegetation and raising fire probability. This directly motivated the second what-if scenario in the Python model.</p>
+  <p>The EU Climate Change website [4] provided context on how deforestation and rising temperatures interact with wildfire risk — specifically that canopy loss increases direct sunlight reaching the forest floor, drying ground vegetation and raising fire probability. This directly motivated the second what-if scenario in the Python model, which simulates deforestation by multiplying light levels by 1.4.</p>
 
-  <p>Based on this research, the key design decisions were: to use a rolling average to define "normal" dynamically; to combine temperature and light as risk factors; and to build the Python model as an offline extension of the same adaptive logic running on the device.</p>
+  <p>Based on this research, the key design decisions were: to use a fixed threshold on the embedded device for simplicity and reliability, to add sudden-change detection as a proxy for the rate-of-change insight from WWF research, and to implement the full adaptive model in Python where it could be applied to a complete dataset rather than one reading at a time.</p>
 </section>
 
 <hr>
@@ -357,26 +281,26 @@
   <h2>3. Plan and Design</h2>
 
   <h3>Design Objectives</h3>
-  <p>The system needed to meet all basic and advanced requirements while remaining achievable on a BBC micro:bit — a device with no network connectivity, limited memory, and a 5×5 LED display. The core design objective was to build something genuinely adaptive: a system that adjusts its own model of the environment rather than comparing readings to fixed numbers.</p>
+  <p>The system needed to meet all basic and advanced requirements while remaining achievable on a BBC micro:bit — a device with no network connectivity, limited memory, and a 5×5 LED display. The core design objective was to build a functional embedded monitor that could collect real environmental data and feed it into an offline Python model capable of adaptive analysis and scenario testing.</p>
 
   <h3>Options Considered</h3>
-  <p>Initially, a simple threshold system was implemented (alert if temperature exceeds 35°C). This was rejected because it does not account for ambient conditions — 33°C might be normal on a hot afternoon but dangerous if the usual baseline is 20°C. The exponential moving average approach was chosen because it is cheap enough to run on the micro:bit in a continuous loop and produces a genuinely adaptive baseline without extra memory storage.</p>
+  <p>Initially, the embedded system was considered as the location for the full adaptive model. This was rejected because the micro:bit has a very limited processing loop and maintaining rolling averages and margin counters across two concurrent forever loops introduced timing complexity. Instead, the embedded system uses a straightforward fixed threshold (35°C for critical, below 0°C for frost) with sudden-change detection, while all adaptive logic lives in the Python model. This separation keeps each component reliable and testable independently.</p>
   <p>A Raspberry Pi was considered as an alternative platform but rejected — the micro:bit is sufficient for the sensors required and is more relevant to the embedded systems brief.</p>
 
   <h3>Stakeholders and End User Needs</h3>
-  <p>The primary end user is a forest ranger or environmental monitoring officer who needs to be alerted quickly and clearly. This shaped two decisions: the LED display must be readable at a glance (simple iconic symbols), and the alarm must be audible. A secondary user is a data analyst who would use the logged CSV data and Python model outputs to review historical risk patterns. Their need is for comprehensive, well-labelled data — which is why seven variables are logged per reading, including internal model state.</p>
+  <p>The primary end user is a forest ranger or environmental monitoring officer who needs to be alerted quickly and clearly. This shaped two decisions: the LED display uses simple iconic symbols readable at a glance (exclamation mark for critical heat, X for frost, arrows for sudden changes), and the alarm is audible. A secondary user is a data analyst who would use the logged CSV data and Python model outputs to review historical risk patterns. Their need is for well-labelled, complete data — which is why the Python model logs seven variables per reading including internal model state.</p>
 
   <h3>Technologies</h3>
-  <p>The embedded system uses MakeCode TypeScript on the BBC micro:bit, providing built-in access to the temperature sensor, light sensor, LED matrix, buzzer, buttons, and datalogger. The computer model is written in Python 3 using only the standard library (csv, os, random, math) so it can be run without installing any packages.</p>
+  <p>The embedded system uses MakeCode TypeScript on the BBC micro:bit, providing built-in access to the temperature sensor, light sensor, LED matrix, buzzer, buttons, and datalogger. The computer model is written in Python 3 using only the standard library (csv, math) so it can be run without installing any packages.</p>
 
   <h3>System Architecture</h3>
-  <p>The system has three concurrent sections on the micro:bit and one offline Python model:</p>
+  <p>The embedded system has three concurrent sections on the micro:bit: a main forever loop that reads sensors, updates the display, and detects sudden changes; an adaptive logging loop that writes temperature and light to the datalogger every three seconds; and two interrupt-driven button handlers. These feed into an offline Python model:</p>
 
   <img src="flowchart.png" alt="System flowchart showing main loop, logging loop, button handlers and Python model" class="flowchart-img">
   <p style="font-size:0.85rem; color:#555; text-align:center; margin-top:-0.75rem;">Figure 1 — Program flowchart. Three concurrent micro:bit sections feed into an offline Python model.</p>
 
-  <h3>Adaptive Feedback Loop Design</h3>
-  <p>The core adaptive loop was designed as: <strong>Sense → Update model → Recalculate thresholds → Score risk → Adapt margins → Respond → Log → repeat.</strong> The warning margins themselves change over time — sustained high risk tightens them (more sensitive), sustained calm relaxes them — so the system's behaviour emerges from its own collected data rather than from hardcoded rules.</p>
+  <h3>Embedded System Logic</h3>
+  <p>The main loop reads temperature and light each cycle, then evaluates three independent conditions using separate if-blocks: whether temperature exceeds 35°C (critical alarm), whether it is below 0°C (frost icon), and whether it has risen or fallen more than 3°C since the previous reading (spike or drop arrow). Using separate blocks rather than an else-if chain ensures that no condition can be masked by another — a critical insight discovered during a debugging phase described in Section 4.</p>
 </section>
 
 <hr>
@@ -390,44 +314,74 @@
     <div class="timeline-item">
       <div class="week">Week 1–2</div>
       <h4>Basic Sensor Reading and Display</h4>
-      <p>Initial micro:bit code read temperature and displayed it on button press. Light level reading added. Simple threshold alert (temp > 35°C = exclamation mark) implemented and tested.</p>
+      <p>Initial micro:bit code read temperature and displayed it on Button B press. Light level reading added. A simple threshold alert (temperature above 35°C triggers an exclamation mark and alarm tone) was implemented and tested on the device.</p>
     </div>
     <div class="timeline-item">
       <div class="week">Week 3–4</div>
       <h4>Logic Bug Fixes</h4>
-      <p>Three significant logic errors identified: the light variable was only read once at startup; the else-if chain made the freezing condition and temperature drop detection unreachable; and the temperature drop check was inside the same chain as the rise check, preventing both from triggering. All were corrected by restructuring into separate if-blocks and moving sensor reads into the loop.</p>
+      <p>Three significant logic errors were identified and corrected. The light variable was only being read once at startup rather than inside the loop. The original else-if chain made the below-zero (frost) condition and the temperature-drop detection unreachable. Restructuring into separate if-blocks and moving all sensor reads into the main loop resolved these issues.</p>
     </div>
     <div class="timeline-item">
       <div class="week">Week 5–6</div>
-      <h4>Adaptive Model Implementation</h4>
-      <p>Replaced the fixed 35°C threshold with an exponential moving average baseline. Dynamic thresholds calculated from the baseline. Fire risk score (0–4) introduced combining temperature and light. Warning margin adaptation added based on alertCount and allClearCount.</p>
+      <h4>Button Handlers and Display Icons</h4>
+      <p>Button A was implemented to read the current light level and display a contextual icon: a moon shape for darkness, a half sun for dim light, a sun outline for normal daylight, and a full blazing sun for high sunlight (above 170). Button B was configured to display the current temperature as a number. All LED patterns were tested in different lighting conditions.</p>
     </div>
     <div class="timeline-item">
       <div class="week">Week 7–8</div>
-      <h4>Logging and Display Modes</h4>
-      <p>Datalogger integrated with seven variables per reading. Adaptive log interval implemented (1–4 seconds by risk level). Button B display cycle (displayMode counter with modulo) added to show T, R, B, and TH readings on demand.</p>
+      <h4>Logging Loop and Sudden Change Detection</h4>
+      <p>A second forever loop was added to write light value and temperature to the micro:bit datalogger every three seconds independently of the main loop. Sudden-change detection was added to the main loop: a rise or fall of more than 3°C compared to the previous reading shows a directional arrow for one second.</p>
     </div>
     <div class="timeline-item">
       <div class="week">Week 9–10</div>
       <h4>Python Model and What-If Scenarios</h4>
-      <p>Python model written to replicate the adaptive algorithm offline. Two what-if scenarios implemented: sudden heatwave (+8°C with freeze_baseline=True) and canopy loss (light ×1.4). Results compared in a final output table.</p>
+      <p>The Python model was written to accept sensor summary values entered by the user, reconstruct a full data series mathematically, then run the adaptive algorithm across it. Two what-if scenarios were implemented: a sudden heatwave (+8°C with freeze_baseline=True) and canopy loss (light ×1.4). Results are saved to four CSV files and printed as a comparison table.</p>
     </div>
     <div class="timeline-item">
       <div class="week">Week 11–12</div>
       <h4>Testing and Report</h4>
-      <p>Final testing of all branches. Report written. Video recorded demonstrating all features.</p>
+      <p>Final testing of all branches on the device. Report written and structured as an HTML file. Video recorded demonstrating all features of both the embedded system and the Python model.</p>
     </div>
   </div>
 
   <h3>Testing</h3>
-  <p>Testing was carried out throughout development. For the micro:bit, the temperature sensor was tested by warming the device with a hand to trigger the alert condition and checking that the alarm fired correctly. The Button A light modes were tested in a dark room, dim light, normal room light, and direct bright light. The rolling average was verified by watching the B: display value shift gradually over several minutes as ambient temperature changed.</p>
-  <p>For the Python model, the three scenarios were verified by checking that the baseline produced a low average risk on realistic data, that the heatwave scenario with freeze_baseline produced a large number of critical events, and that the canopy loss scenario increased high-light events by the expected proportion.</p>
+  <p>For the embedded system, the temperature sensor was tested by warming the device with a hand to verify the 35°C alarm fired correctly with the exclamation icon and tone. The below-zero condition was tested by noting that holding an ice pack near the device caused the X icon to appear. Button A light modes were tested in a dark room, dim light, normal room light, and in direct sunlight near a window. Sudden-change detection was verified by briefly warming the sensor quickly to confirm the upward arrow appeared for one second before reverting to the normal display.</p>
+  <p>For the Python model, the three scenarios were verified by checking that a realistic baseline dataset produced low average risk, that the heatwave scenario with freeze_baseline generated a large number of critical events, and that the canopy loss scenario increased the proportion of high-light readings by approximately the expected amount.</p>
 
   <h3>A Problem Encountered</h3>
-  <p>The most significant problem was an unreachable condition bug in the temperature display logic. The original code had a chain of else-if blocks checking: temperature > 35, then temperature < 35, then temperature < 0, then temperature drop. Because temperature < 35 catches every value below 35, the checks for below zero and for temperature drops could never be reached. The fix was to separate the conditions into independent if-blocks and reorder them so the most specific check (below zero) came before the general check (below 35). This was identified by manually tracing through the code with test values (e.g. −2°C) and noting that the freezing icon never appeared.</p>
+  <p>The most significant problem was an unreachable condition bug in the temperature display logic. The original code used an else-if chain: temperature above 35, else temperature below 35, else temperature below 0, else temperature drop. Because the "temperature below 35" branch catches every value below 35, the checks for below zero and for temperature drops could never be reached — the code would always stop at the second branch. The frost icon and drop arrow never appeared during testing, which was how the bug was noticed. The fix was to restructure all conditions into independent if-blocks and place the most specific check (below zero) before any general check. After restructuring, all four display states were confirmed to work correctly by tracing through with test values of −2°C and a rapid 4°C drop.</p>
 
   <h3>The Python Model</h3>
-  <p>The Python model processes a dataset of environmental readings — either exported from the micro:bit datalogger as a CSV, or a built-in simulated dataset if no file is present. It runs the same adaptive algorithm as the micro:bit: exponential moving average baseline, dynamic thresholds, fire risk scoring, and margin adaptation. The key function is <code>run_model()</code>, which accepts a <code>temp_offset</code>, a <code>light_multiplier</code>, and a <code>freeze_baseline</code> flag to configure each scenario.</p>
+  <p>The Python model is divided into four sections. The first collects summary values from the user — peak temperature, lowest temperature, starting temperature, largest single-cycle change, peak light, average light, number of readings, and session duration. The second reconstructs a full data series from these values using a sine-wave interpolation, so the model has a realistic curve of readings to process even without a CSV export from the device. The third section runs the adaptive wildfire risk algorithm: it maintains an exponential moving average baseline (updated each cycle as <code>rolling_avg = rolling_avg * 0.9 + temp * 0.1</code> unless freeze_baseline is set), derives warning and critical thresholds from the baseline, scores fire risk from 0 to 4 by checking temperature against the baseline and thresholds and light against 170, and adapts the warning margin based on sustained high-risk or all-clear counts. The fourth section saves the per-reading results to CSV and prints a comparison table across all four scenarios.</p>
+
+  <div class="code-block">
+    <div class="code-label">Python — core adaptive algorithm (from run_model)</div>
+    <pre># Exponential moving average — baseline shifts gradually
+if not freeze_baseline:
+    rolling_avg = rolling_avg * 0.9 + temp * 0.1
+
+# Dynamic thresholds derived from live baseline
+warning_threshold  = rolling_avg + warning_margin
+critical_threshold = rolling_avg + critical_margin
+
+# Score fire risk relative to context, not hardcoded numbers
+risk = 0
+if temp > rolling_avg + 2:    risk += 1
+if temp > warning_threshold:  risk += 1
+if temp > critical_threshold: risk += 1
+if light > 170:               risk += 1
+
+# Adapt margins based on sustained conditions (the feedback loop)
+if risk >= 3:
+    alert_count += 1
+    all_clear_count = 0
+    if alert_count >= 4 and warning_margin > 2:
+        warning_margin -= 1   # become more sensitive
+elif risk == 0:
+    all_clear_count += 1
+    alert_count = 0
+    if all_clear_count >= 6 and warning_margin < 7:
+        warning_margin += 1   # relax back toward normal</pre>
+  </div>
 
   <h3>What-If Scenarios</h3>
   <table>
@@ -472,35 +426,7 @@
     </tbody>
   </table>
 
-  <p>Scenario 1 uses <code>freeze_baseline=True</code> to model a sudden unexpected heatwave before the system has had time to recalibrate — this represents the most dangerous real-world case. Scenario 2 simulates deforestation removing tree canopy, increasing the direct sunlight reaching the forest floor and pushing more readings above the light threshold. The combined scenario shows that heatwave and canopy loss together produce a worst-case outcome significantly worse than either alone.</p>
-
-  <div class="code-block">
-    <div class="code-label">Python — core adaptive algorithm (run_model function)</div>
-    <pre># Exponential moving average — baseline shifts gradually
-if not freeze_baseline:
-    rolling_avg = rolling_avg * 0.9 + temp * 0.1
-
-# Dynamic thresholds derived from live baseline
-warning_threshold = rolling_avg + warning_margin
-critical_threshold = rolling_avg + critical_margin
-
-# Score fire risk relative to context, not hardcoded numbers
-risk = 0
-if temp > rolling_avg + 2:   risk += 1
-if temp > warning_threshold: risk += 1
-if temp > critical_threshold: risk += 1
-if light > 170:              risk += 1
-
-# Adapt margins based on sustained conditions (the feedback loop)
-if risk >= 3:
-    alert_count += 1
-    if alert_count >= 4 and warning_margin > 2:
-        warning_margin -= 1   # become more sensitive
-elif risk == 0:
-    all_clear_count += 1
-    if all_clear_count >= 6 and warning_margin < 7:
-        warning_margin += 1   # relax back toward normal</pre>
-  </div>
+  <p>Scenario 1 uses <code>freeze_baseline=True</code> to model a sudden unexpected heatwave before the system has had time to recalibrate — this represents the most dangerous real-world case. Scenario 2 simulates deforestation removing tree canopy, increasing direct sunlight reaching the forest floor and pushing more readings above the light threshold of 170. The combined scenario shows that heatwave and canopy loss together produce a worst-case outcome significantly worse than either alone.</p>
 </section>
 
 <hr>
@@ -509,15 +435,14 @@ elif risk == 0:
 <section id="evaluation">
   <h2>5. Evaluation</h2>
 
-  <p>The final artefact successfully meets all basic and advanced requirements of the brief. The embedded system collects real environmental data, simulates wildfire risk, and adapts its own sensitivity based on sustained conditions. The Python model extends this to a full dataset analysis with two meaningful what-if scenarios that produce clearly different and explainable outcomes.</p>
+  <p>The final artefact successfully meets all basic and advanced requirements of the brief. The embedded system collects real environmental data, simulates wildfire risk using a threshold-based alarm with contextual light and sudden-change detection, and logs readings to the datalogger. The Python model extends this to a full dataset analysis using an adaptive algorithm, with two meaningful what-if scenarios that produce clearly different and explainable outcomes.</p>
 
-  <p>The adaptive model performs well as a concept: the exponential moving average correctly shifts the baseline over time, and the margin adaptation demonstrably changes the system's behaviour under sustained alerts. The logged data includes the internal model state (warning_margin, rolling baseline, dynamic threshold), which makes the adaptation visible and verifiable — an examiner can open the CSV and see the margins change over the course of a run.</p>
+  <p>The separation of concerns between the embedded system and the Python model worked well. The micro:bit code is simple and reliable — all conditions are independent if-blocks, sensor reads happen every cycle, and the logging loop runs separately so that display and data collection do not interfere with each other. The Python model handles the complexity of the adaptive algorithm where it can operate on a full sequence of readings rather than one at a time.</p>
 
-  <p>There are clear limitations. The micro:bit temperature sensor is affected by heat generated by the device itself, which introduces a small upward bias in readings. The light sensor is affected by the angle at which the device is held. In a real deployment, calibrated external sensors would be used. The current model also uses temperature and light as proxies for wildfire risk, but a more complete model would include humidity and wind speed — both of which significantly affect real fire spread.</p>
+  <p>There are clear limitations. The micro:bit temperature sensor is affected by heat generated by the device itself, introducing a small upward bias in readings. The light sensor is affected by the angle at which the device is held. The embedded alarm threshold is fixed at 35°C and does not adapt to ambient conditions — a genuinely cool forest and a warm one would trigger at the same absolute temperature. In a real deployment, the adaptive logic from the Python model would ideally run on the device itself, or calibrated external sensors would be used. The current model also uses temperature and light as proxies for wildfire risk; a more complete model would include humidity and wind speed, both of which significantly affect real fire spread.</p>
 
   <h3>Future Improvements</h3>
-  <p>The most valuable next step would be to connect external sensors via the GPIO pins — particularly a DHT22 humidity sensor and a soil moisture sensor. Humidity is arguably more important than temperature alone for wildfire risk, since dry vegetation is what actually burns. Soil moisture would allow the model to simulate drought cycle detection, another key example from the brief.</p>
-  <p>The Python model could also be extended with a time-series prediction component — using the rolling average trend to forecast where the baseline is heading and flag risk before it arrives, rather than only scoring current conditions.</p>
+  <p>The most valuable next step would be to connect external sensors via the GPIO pins — particularly a DHT22 humidity sensor. Humidity is arguably more important than temperature alone for wildfire risk, since dry vegetation is what actually burns. Adding humidity would allow the Python model to incorporate a fire weather index, a standard real-world metric combining temperature, humidity, and wind. The Python model could also be extended with a time-series prediction component — using the rolling average trend to forecast where the baseline is heading and flag risk before it arrives, rather than only scoring current conditions.</p>
 </section>
 
 <hr>
@@ -542,12 +467,12 @@ elif risk == 0:
       <tr><th>Section</th><th>Word Count</th></tr>
     </thead>
     <tbody>
-      <tr><td>1. Meeting the Brief</td><td>~180</td></tr>
-      <tr><td>2. Investigation</td><td>~380</td></tr>
-      <tr><td>3. Plan and Design</td><td>~430</td></tr>
-      <tr><td>4. Create</td><td>~620</td></tr>
-      <tr><td>5. Evaluation</td><td>~290</td></tr>
-      <tr class="total"><td>Total</td><td>~1900</td></tr>
+      <tr><td>1. Meeting the Brief</td><td>~220</td></tr>
+      <tr><td>2. Investigation</td><td>~370</td></tr>
+      <tr><td>3. Plan and Design</td><td>~420</td></tr>
+      <tr><td>4. Create</td><td>~650</td></tr>
+      <tr><td>5. Evaluation</td><td>~300</td></tr>
+      <tr class="total"><td>Total</td><td>~1960</td></tr>
     </tbody>
   </table>
   <p style="font-size:0.85rem; color:#666;">Note: Update word counts to exact figures before submission. Total is well within the 2500 word limit.</p>
