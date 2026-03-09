@@ -296,7 +296,7 @@
   <h3>System Architecture</h3>
   <p>The embedded system has three concurrent sections on the micro:bit: a main forever loop that reads sensors, updates the display, and detects sudden changes; an adaptive logging loop that writes temperature and light to the datalogger every three seconds; and two interrupt-driven button handlers. These feed into an offline Python model:</p>
 
-  <img src="flowchart.png" alt="System flowchart showing main loop, logging loop, button handlers and Python model" class="flowchart-img">
+  <img src="flowchart.png" 
   <p style="font-size:0.85rem; color:#555; text-align:center; margin-top:-0.75rem;">Figure 1 — Program flowchart. Three concurrent micro:bit sections feed into an offline Python model.</p>
 
   <h3>Embedded System Logic</h3>
@@ -484,3 +484,4 @@ elif risk == 0:
 
 </body>
 </html>
+
