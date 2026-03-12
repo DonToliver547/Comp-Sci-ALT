@@ -1,5 +1,5 @@
-import csv
-
+ 
+# readings collected from the microbit datalogger
 readings = [
     {"temp": 20, "light": 100},
     {"temp": 21, "light": 110},
@@ -12,115 +12,79 @@ readings = [
     {"temp": 22, "light": 120},
     {"temp": 20, "light": 100},
 ]
+ 
 
-
-# --- STEP 2: DEFINE THE MODEL FUNCTION ---
-# This function takes the readings and works out the fire risk.
-# temp_offset  = adds extra heat (used for heatwave scenario)
-# light_boost  = multiplies light level (used for canopy loss scenario)
-
+# temp_offset adds extra degrees (used for heatwave scenario)
+# light_boost makes the light stronger (used for canopy loss scenario)
 def run_model(readings, temp_offset=0, light_boost=1.0, label="Baseline"):
-
-    # The rolling average starts at the first temperature reading.
-    # It will slowly update each cycle to track what "normal" feels like.
+ 
+    # start the rolling average at the first temperature
     rolling_avg = readings[0]["temp"]
-
-    # The warning margin controls how far above normal = danger.
-    # It starts at 5 degrees and can tighten or relax over time.
+ 
+    # warning margin - how far above normal before we flag a warning
+    # this can change over time depending on conditions
     warning_margin = 5
-
-    total_risk = 0       # We'll add up all the risk scores
-    critical_count = 0   # Count how many readings hit risk level 3+
-
-    # Store per-reading results so we can write them to CSV later
-    results = []
-
-    # Simulate time in seconds — each reading is ~3 seconds apart,
-    # matching the 3-second logging interval on the micro:bit
-    time_seconds = 0.0
-
-    print("\n--- " + label + " ---")
-    print(f"{'Read':>4}  {'Temp':>5}  {'Light':>5}  {'Avg':>5}  {'Risk':>4}")
-
-    for i, row in enumerate(readings):
-
-        # Apply any scenario adjustments to this reading
-        temp = row["temp"] + temp_offset
-        light = min(255, int(row["light"] * light_boost))
-
-        # Update the rolling average using an exponential moving average.
-        # This means it slowly drifts toward the current temperature.
-        # Old average matters 90%, new reading matters 10%.
+ 
+    total_risk = 0
+    critical_count = 0
+ 
+    print("--- " + label + " ---")
+ 
+    for i in range(len(readings)):
+ 
+        # get this reading and apply any scenario changes
+        temp = readings[i]["temp"] + temp_offset
+        light = readings[i]["light"] * light_boost
+        if light > 255:
+            light = 255
+ 
+        # update rolling average - old average counts 90%, new reading counts 10%
         rolling_avg = rolling_avg * 0.9 + temp * 0.1
-
-        # The warning threshold is the rolling average plus the margin.
-        # If today is warmer than usual by this much, that's a warning.
+ 
+        # warning threshold is rolling average plus the margin
         warning_threshold = rolling_avg + warning_margin
-
-        # --- CALCULATE FIRE RISK (0 to 4) ---
+ 
+        # work out fire risk score (0 to 4)
         risk = 0
-
-        if temp > rolling_avg + 2:       # Warmer than recent normal
-            risk += 1
-        if temp > warning_threshold:     # Above warning level
-            risk += 1
-        if temp > warning_threshold + 5: # Extreme heat
-            risk += 1
-        if light > 170:                  # Bright sun = dry conditions
-            risk += 1
-
-        # --- ADAPT THE WARNING MARGIN ---
-        # If risk has been high for a while, tighten the margin (more sensitive).
-        # If conditions are calm, relax the margin back toward normal.
+ 
+        if temp > rolling_avg + 2:
+            risk = risk + 1   # warmer than normal
+ 
+        if temp > warning_threshold:
+            risk = risk + 1   # above warning level
+ 
+        if temp > warning_threshold + 5:
+            risk = risk + 1   # extreme heat
+ 
+        if light > 170:
+            risk = risk + 1   # bright sun means dry conditions
+ 
+        # adapt the warning margin based on conditions
         if risk >= 3 and warning_margin > 2:
-            warning_margin -= 1   # become more alert
-        elif risk == 0 and warning_margin < 7:
-            warning_margin += 1   # relax back to normal
-
-        # Keep a running total and count critical events
-        total_risk += risk
+            warning_margin = warning_margin - 1   # tighten up if its been hot
+ 
+        if risk == 0 and warning_margin < 7:
+            warning_margin = warning_margin + 1   # relax if its been calm
+ 
+        total_risk = total_risk + risk
+ 
         if risk >= 3:
-            critical_count += 1
-
-        # Print this reading's results in a simple table
-        print(f"{i+1:>4}  {temp:>5.1f}  {light:>5}  {rolling_avg:>5.1f}  {risk:>4}")
-
-        # Save this row for CSV export
-        results.append({
-            "time (seconds)": round(time_seconds, 3),
-            "light value":    light,
-            "temperature value": temp
-        })
-
-        # Advance simulated time by 3 seconds per reading
-        time_seconds += 3.0
-
-    # Work out the average risk across all readings
+            critical_count = critical_count + 1
+ 
+        print("Reading " + str(i + 1) + ":  Temp=" + str(temp) + "  Light=" + str(int(light)) + "  Avg=" + str(round(rolling_avg, 1)) + "  Risk=" + str(risk))
+ 
     avg_risk = total_risk / len(readings)
-
-    print(f"\n  Average risk: {avg_risk:.2f} / 4")
-    print(f"  Critical events (risk 3+): {critical_count}")
-
-    # --- WRITE CSV ---
-    # File is named after the scenario label, spaces replaced with underscores
-    filename = label.replace(" ", "_") + ".csv"
-    with open(filename, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["time (seconds)", "light value", "temperature value"])
-        writer.writeheader()
-        writer.writerows(results)
-
-    print(f"  CSV saved → {filename}")
-
-    return results
-
-
-# --- STEP 3: RUN THREE SCENARIOS ---
-
-# Scenario A: Normal conditions (no changes)
+ 
+    print("Average risk: " + str(round(avg_risk, 2)) + " out of 4")
+    print("Critical readings (risk 3 or higher): " + str(critical_count))
+    print("")
+ 
+ 
+# run the baseline - normal conditions
 run_model(readings, label="Baseline")
-
-# Scenario B: Sudden heatwave — add 8 degrees to every reading
+ 
+# scenario 1 - heatwave, add 8 degrees to every reading
 run_model(readings, temp_offset=8, label="Heatwave +8C")
-
-# Scenario C: Canopy loss (deforestation) — light is 40% brighter
-run_model(readings, light_boost=1.4, label="Canopy Loss (light x1.4)")
+ 
+# scenario 2 - canopy loss from deforestation, light is 40% stronger
+run_model(readings, light_boost=1.4, label="Canopy Loss")
